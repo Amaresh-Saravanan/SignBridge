@@ -45,10 +45,10 @@ export default function History() {
 
   const filtered = historyItems.filter((item) => {
     // Search match
-    const searchMatch = 
+    const searchMatch =
       item.preview.toLowerCase().includes(search.toLowerCase()) ||
       item.phrase.toLowerCase().includes(search.toLowerCase())
-    
+
     // Tab match
     const isSaved = savedIds.includes(item.id)
     const tabMatch = activeTab === 'all' || (activeTab === 'saved' && isSaved)
@@ -77,6 +77,7 @@ export default function History() {
           type="button"
           onClick={() => navigate('/hub')}
           className="inline-flex items-center gap-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors cursor-pointer outline-none group"
+          aria-label="Go back to Hub"
         >
           <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-0.5" />
           Back to Hub
@@ -137,7 +138,7 @@ export default function History() {
             />
           </div>
         </div>
- 
+
         {/* Filter chips */}
         <div className="w-full flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none select-none">
           {['all', 'everyday', 'medical'].map((chip) => (
@@ -155,7 +156,7 @@ export default function History() {
             </button>
           ))}
         </div>
- 
+
         {loading && (
           <div className="w-full flex flex-col gap-4">
             {[1, 2, 3].map((i) => (
@@ -166,7 +167,7 @@ export default function History() {
             ))}
           </div>
         )}
- 
+
         {error && (
           <div className="w-full bg-[var(--color-error-tint)] border border-[var(--color-error)] rounded-[var(--radius-lg)] p-8 text-center flex flex-col items-center gap-3">
             <AlertCircle size={40} className="text-[var(--color-error)]" />
@@ -177,7 +178,7 @@ export default function History() {
             </Button>
           </div>
         )}
- 
+
         {!loading && !error && (
           <AnimatePresence mode="popLayout">
             {filtered.length > 0 ? (
@@ -194,7 +195,7 @@ export default function History() {
                       <div className="w-10 h-10 rounded-full bg-[var(--color-accent-soft)] flex items-center justify-center text-[var(--color-accent)] shrink-0 mt-1 border border-[var(--color-accent)]/10">
                         <WaveformMotif state="active" size={18} />
                       </div>
-                      
+
                       <div className="flex flex-col items-start gap-1.5 flex-1">
                         <div className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)] font-mono">
                           <Calendar size={12} className="text-[var(--color-text-disabled)]" />
@@ -210,7 +211,7 @@ export default function History() {
                         <p className="text-base font-semibold leading-relaxed text-[var(--color-text-primary)]">{item.preview}</p>
                       </div>
                     </div>
-                    
+
                     <Button
                       variant="primary"
                       loading={replayingId === item.id}

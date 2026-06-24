@@ -3,12 +3,12 @@
 
 /* ===== DESIGN TOKENS — Dark Humanist Palette ===== */
 @theme {
-  /* Surfaces */
-  --color-bg-base: #0E1116;
-  --color-surface: #161B22;
-  --color-surface-alt: #1B212A;
-  --color-surface-elevated: #1F2630;
-  --color-border: rgba(247, 244, 239, 0.08);
+  /* Surfaces — Updated for Glassmorphism */
+  --color-bg-base: #0A0C10;
+  --color-surface: rgba(22, 27, 34, 0.65);
+  --color-surface-alt: rgba(27, 33, 42, 0.65);
+  --color-surface-elevated: rgba(31, 38, 48, 0.75);
+  --color-border: rgba(255, 255, 255, 0.08);
 
   /* Text */
   --color-text-primary: #F7F4EF;
@@ -77,6 +77,7 @@
 
   --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.2);
   --shadow-elevated: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --shadow-dropdown: 0 12px 32px rgba(0, 0, 0, 0.4);
 
   --animate-shimmer: shimmer 1.4s linear infinite;
   --animate-bg-drift: bgDrift 25s ease infinite;
@@ -107,6 +108,13 @@ body {
   line-height: 1.5;
   min-height: 100vh;
   overflow-x: hidden;
+}
+
+/* Glassmorphism hook for Tailwind generated classes */
+[class*="bg-[var(--color-surface)]"],
+[class*="bg-[var(--color-surface-elevated)]"] {
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
 }
 
 /* ===== TYPOGRAPHY ===== */
@@ -182,6 +190,7 @@ h3, .h3 {
 ::-webkit-scrollbar-thumb {
   background: var(--color-border);
   border-radius: 3px;
+  transition: background 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -253,16 +262,6 @@ h3, .h3 {
   position: relative;
   overflow: hidden;
   background-color: var(--color-bg-base);
-}
-
-.blob-bg::before,
-.blob-bg::after {
-  content: '';
-  display: none;
-}
-
-.blob-bg .blob-peach {
-  display: none;
 }
 
 /* ===== PROCESSING PULSE RING ===== */
@@ -366,4 +365,3 @@ h3, .h3 {
   padding: 24px;
   box-shadow: var(--shadow-card);
 }
-

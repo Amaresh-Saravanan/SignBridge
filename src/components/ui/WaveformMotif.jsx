@@ -80,7 +80,7 @@ export default function WaveformMotif({ state = 'idle', className = '', size = 4
         className="text-[var(--color-text-secondary)] opacity-30"
       >
         <motion.path
-          d="M 0 6 Q 25 6, 50 6 T 100 6"
+          d="M 0 6 Q 25 4, 50 6 T 100 6"
           animate={{
             d: [
               "M 0 6 Q 25 4, 50 6 T 100 6",

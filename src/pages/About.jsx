@@ -38,19 +38,19 @@ export default function About() {
               <span className="w-8 h-px bg-[var(--color-accent)]" />
               <span className="text-xs uppercase tracking-wider font-semibold">Our mission</span>
             </motion.div>
- 
+
             <motion.h1 variants={itemVariants} className="h1 leading-tight font-display">
               Bridging worlds through Indian Sign Language
             </motion.h1>
- 
+
             <motion.p variants={itemVariants} className="text-body text-[var(--color-text-secondary)] leading-relaxed">
               We believe communication is a fundamental human right. Yet, for millions of Deaf and Hard of Hearing individuals in India, everyday interactions—at a pharmacy counter, in a classroom, or at a government office—often depend heavily on the availability of a physical sign language interpreter.
             </motion.p>
- 
+
             <motion.p variants={itemVariants} className="text-body text-[var(--color-text-secondary)] leading-relaxed">
               This is the gap SignBridge seeks to bridge. Our mission is to democratize accessibility by providing an instant, bidirectional translation tool between spoken languages and Indian Sign Language (ISL). Through real-time 3D avatar animations and lightweight camera-based gesture recognition, we create a direct line of understanding between hearing and Deaf users.
             </motion.p>
- 
+
             <motion.div
               variants={itemVariants}
               className="pl-8 border-l-2 border-[var(--color-accent)] my-6 flex flex-col gap-3 bg-[var(--color-accent-soft)] p-6 rounded-r-[var(--radius-default)] relative overflow-hidden"
@@ -60,15 +60,15 @@ export default function About() {
               </p>
               <span className="text-caption text-[var(--color-text-secondary)] font-bold tracking-wider uppercase">— The SignBridge Team</span>
             </motion.div>
- 
+
             <motion.p variants={itemVariants} className="text-body text-[var(--color-text-secondary)] leading-relaxed">
               Our design is guided by humanness and accessibility. We want to remove the friction of heavy hardware or constant internet-dependent streaming. SignBridge is built to run smoothly in standard web browsers, empowering users with immediate, private, and dignity-preserving translations.
             </motion.p>
- 
+
             <motion.p variants={itemVariants} className="text-body text-[var(--color-text-secondary)] leading-relaxed">
               As an open accessibility initiative, this platform proves that the translation loop can be closed end-to-end. We hope to inspire developers, healthcare workers, and public advocates to build a digital ecosystem that excludes no one.
             </motion.p>
- 
+
             <motion.div variants={itemVariants} className="pt-8 border-t border-[var(--color-border)] w-full">
               <Button variant="primary" onClick={() => navigate('/auth')}>
                 Start translating

@@ -68,7 +68,7 @@ export default function SignUpForm({ onToggleMode }) {
       onSubmit={handleSubmit}
       className="flex flex-col gap-6"
     >
-      <h3 className="text-center text-[var(--color-text-primary)]">Create your account</h3>
+      <h3 className="h3 font-display text-center text-[var(--color-text-primary)]">Create your account</h3>
 
       <Input
         id="signup-name"

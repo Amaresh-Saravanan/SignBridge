@@ -51,7 +51,7 @@ export default function Landing() {
         <div className="max-w-[1280px] mx-auto px-6 md:px-12 pt-20 md:pt-32 pb-36">
           {/* Hero as Mirrored Split-Panels */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch min-h-[60vh] mb-24">
-            
+
             {/* Left Panel: Narrative & Call to Action */}
             <motion.div
               variants={containerVariants}
@@ -67,18 +67,18 @@ export default function Landing() {
                 <WaveformMotif state="listening" size={16} />
                 <span>Bidirectional ISL Translation</span>
               </motion.div>
- 
+
               <motion.h1 variants={itemVariants} className="h1 leading-tight tracking-tight">
                 A direct bridge between spoken words and sign language.
               </motion.h1>
- 
+
               <motion.p
                 variants={itemVariants}
                 className="text-body text-[var(--color-text-secondary)] leading-relaxed"
               >
                 SignBridge translates spoken conversations into Indian Sign Language via an interactive 3D avatar, and uses lightweight camera gestures to translate signs back into text and voice. Designed to make Deaf and hearing interactions direct, private, and equal.
               </motion.p>
- 
+
               <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-6 w-full sm:w-auto pt-2">
                 <Button variant="primary" onClick={handleCTA} className="group flex items-center justify-center gap-2">
                   Start translating
@@ -93,7 +93,7 @@ export default function Landing() {
                 </button>
               </motion.div>
             </motion.div>
- 
+
             {/* Right Panel: 3D Avatar Demo */}
             <motion.div
               initial={{ opacity: 0, scale: 0.98 }}
@@ -116,14 +116,14 @@ export default function Landing() {
               </div>
             </motion.div>
           </div>
- 
+
           {/* 3-step row */}
-          <section id="how-it-works" className="pt-24 border-t border-[var(--color-border)]">
+          <section id="how-it-works" className="pt-24 pb-12 border-t border-[var(--color-border)]">
             <div className="flex flex-col gap-3 mb-16 max-w-[580px]">
               <h2 className="h2 font-display">A simple, bidirectional loop</h2>
               <p className="text-body text-[var(--color-text-secondary)]">How SignBridge connects hearing and signing users in a seamless conversation.</p>
             </div>
- 
+
             <motion.div
               initial="hidden"
               whileInView="visible"

@@ -34,7 +34,7 @@ export default function ForgotPasswordForm({ onToggleMode }) {
       transition={{ duration: 0.25 }}
       className="flex flex-col gap-6"
     >
-      <h3 className="text-center text-[var(--color-text-primary)]">Reset your password</h3>
+      <h3 className="h3 font-display text-center text-[var(--color-text-primary)]">Reset your password</h3>
 
       {sent ? (
         <div className="flex flex-col gap-4">
@@ -56,7 +56,7 @@ export default function ForgotPasswordForm({ onToggleMode }) {
           </p>
 
           {error && (
-            <div className="bg-[var(--color-error-tint)] border border-[var(--color-error-shade)] rounded-[var(--radius-sm)] px-4 py-3 text-sm text-[var(--color-error-shade)]">
+            <div role="alert" className="bg-[var(--color-error-tint)] border border-[var(--color-error-shade)] rounded-[var(--radius-sm)] px-4 py-3 text-sm text-[var(--color-error-shade)]">
               {error}
             </div>
           )}

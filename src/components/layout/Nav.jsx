@@ -60,6 +60,7 @@ export default function Nav() {
           className="md:hidden text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors cursor-pointer"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={mobileOpen}
         >
           {mobileOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -67,7 +68,7 @@ export default function Nav() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden absolute top-14 left-0 w-full bg-[var(--color-surface)] border-b border-[var(--color-border)] p-6 flex flex-col gap-4 z-50">
+        <div className="md:hidden absolute top-16 left-0 w-full bg-[var(--color-surface)] border-b border-[var(--color-border)] p-6 flex flex-col gap-4 z-[99]">
           <Link to="/about" onClick={() => setMobileOpen(false)} className="text-base text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]">About</Link>
           {isAuthenticated ? (
             <>

@@ -118,7 +118,8 @@ export default function Collector() {
         {/* Back Link */}
         <button
           onClick={() => navigate('/admin/dictionary')}
-          className="inline-flex items-center gap-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent-mint-shade)] transition-colors cursor-pointer outline-none group"
+          className="inline-flex items-center gap-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors cursor-pointer outline-none group"
+          aria-label="Go back to Dictionary"
         >
           <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-0.5" />
           Back to Dictionary

@@ -42,7 +42,7 @@ export default function LiveCaptions() {
   }
 
   return (
-    <div ref={scrollRef} className="flex flex-col gap-3 p-2 overflow-y-auto max-h-48">
+    <div ref={scrollRef} className="flex flex-col gap-3 p-2 overflow-y-auto max-h-48" aria-live="polite">
       {captions.map((cap) => (
         <div
           key={cap.id}

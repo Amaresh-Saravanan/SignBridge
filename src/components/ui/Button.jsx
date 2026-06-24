@@ -3,20 +3,20 @@ import { Loader2 } from 'lucide-react'
 
 const variants = {
   primary: {
-    base: 'bg-[var(--color-accent)] text-[var(--color-bg-base)] font-semibold',
-    hover: 'hover:brightness-105 shadow-card hover:shadow-elevated',
+    base: 'bg-gradient-to-b from-[var(--color-accent)] to-[#b57a34] text-[var(--color-bg-base)] font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_4px_14px_rgba(201,138,62,0.25)] border border-[#a87130]',
+    hover: 'hover:brightness-110 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_6px_20px_rgba(201,138,62,0.4)]',
   },
   secondary: {
-    base: 'bg-transparent text-[var(--color-accent)] border border-[var(--color-accent)] font-medium',
-    hover: 'hover:bg-[var(--color-accent-soft)] hover:shadow-card',
+    base: 'bg-[rgba(201,138,62,0.05)] text-[var(--color-accent)] border border-[rgba(201,138,62,0.3)] font-medium backdrop-blur-md',
+    hover: 'hover:bg-[rgba(201,138,62,0.12)] hover:border-[var(--color-accent)] hover:shadow-[0_4px_14px_rgba(201,138,62,0.15)]',
   },
   ghost: {
     base: 'bg-transparent text-[var(--color-text-secondary)] font-medium',
-    hover: 'hover:text-[var(--color-text-primary)] hover:bg-[var(--color-accent-soft)]',
+    hover: 'hover:text-[var(--color-text-primary)] hover:bg-[rgba(255,255,255,0.05)]',
   },
   destructive: {
-    base: 'bg-[var(--color-error)] text-white font-medium',
-    hover: 'hover:brightness-105 shadow-card',
+    base: 'bg-gradient-to-b from-[var(--color-error)] to-[#d4453a] text-white font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_4px_14px_rgba(232,88,77,0.25)] border border-[#c13d32]',
+    hover: 'hover:brightness-110 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_6px_20px_rgba(232,88,77,0.4)]',
   },
 }
 

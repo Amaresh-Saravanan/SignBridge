@@ -99,6 +99,7 @@ export default function Dashboard() {
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             className="w-full bg-[rgba(248,113,113,0.1)] border border-[var(--color-error)] text-[var(--color-error)] rounded-[var(--radius-default)] p-4 mb-6 text-sm flex items-center justify-between max-w-[1280px] mx-auto z-20"
+            role="alert"
           >
             <div className="flex items-center gap-2">
               <ShieldAlert size={18} className="animate-pulse" />
@@ -121,7 +122,8 @@ export default function Dashboard() {
         {/* Navigation back button */}
         <button
           onClick={() => navigate('/hub')}
-          className="inline-flex items-center gap-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent-teal)] transition-colors cursor-pointer outline-none group"
+          className="inline-flex items-center gap-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors cursor-pointer outline-none group"
+          aria-label="Go back to Hub"
         >
           <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-0.5" />
           Back to Hub
@@ -130,7 +132,7 @@ export default function Dashboard() {
         {/* Dashboard Header */}
         <div className="w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex flex-col gap-1">
-            <h1 className="text-3xl font-bold tracking-tight">Developer Dashboard</h1>
+            <h1 className="h1 font-display tracking-tight">Developer Dashboard</h1>
             <p className="text-sm text-[var(--color-text-secondary)] font-medium">Real-time telemetry and object detection metrics</p>
           </div>
 

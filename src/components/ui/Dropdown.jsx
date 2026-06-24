@@ -18,8 +18,15 @@ export default function Dropdown({
     const handleClick = (e) => {
       if (ref.current && !ref.current.contains(e.target)) setOpen(false)
     }
+    const handleKey = (e) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
     document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
+    document.addEventListener('keydown', handleKey)
+    return () => {
+      document.removeEventListener('mousedown', handleClick)
+      document.removeEventListener('keydown', handleKey)
+    }
   }, [])
 
   const filtered = searchable
@@ -46,7 +53,7 @@ export default function Dropdown({
 
       {open && (
         <div className="relative z-50">
-          <div className="absolute top-1 left-0 w-full bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-[var(--radius-default)] shadow-[0_12px_32px_rgba(0,0,0,0.08)] overflow-hidden">
+          <div className="absolute top-1 left-0 w-full bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-[var(--radius-default)] shadow-dropdown overflow-hidden">
             {searchable && (
               <div className="flex items-center gap-2 px-3 py-2 border-b border-[var(--color-border)]">
                 <Search size={16} className="text-[var(--color-text-disabled)]" />

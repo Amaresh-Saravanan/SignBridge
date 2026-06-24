@@ -61,7 +61,7 @@ export default function Onboarding() {
           <div className={`h-2 rounded-full transition-all duration-300 ${step === 2 ? 'bg-[var(--color-accent)] w-10' : 'bg-[var(--color-border)] w-2'}`} />
         </div>
       </div>
- 
+
       <div className="flex-1 flex items-center justify-center max-w-[500px] mx-auto w-full">
         <div className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-8 md:p-10 shadow-card min-h-[400px] flex flex-col justify-center gap-8">
           <AnimatePresence mode="wait">
@@ -75,20 +75,20 @@ export default function Onboarding() {
                 className="flex flex-col items-center text-center gap-6"
               >
                 {renderIcon('camera', cameraState)}
- 
+
                 <div className="flex flex-col gap-3">
                   <h3 className="text-2xl font-display font-medium">Allow camera access</h3>
                   <p className="text-body text-[var(--color-text-secondary)] leading-relaxed">
                     We use your camera to translate your sign language gestures in real time. Your video feed is processed entirely on your device—nothing is ever recorded, stored, or sent to the cloud.
                   </p>
                 </div>
- 
+
                 {cameraState === 'denied' && (
                   <p className="text-caption text-[var(--color-error)] bg-[var(--color-error-tint)] border border-[var(--color-error)]/20 rounded-[var(--radius-sm)] px-4 py-2.5">
                     Camera access is blocked. Open your browser&apos;s site settings to allow it, then refresh the page.
                   </p>
                 )}
- 
+
                 <div className="w-full pt-2">
                   {cameraState === 'denied' ? (
                     <Button variant="primary" onClick={handleCameraRequest} className="w-full">
@@ -106,7 +106,7 @@ export default function Onboarding() {
                 </div>
               </motion.div>
             )}
- 
+
             {step === 2 && (
               <motion.div
                 key="step-mic"
@@ -117,20 +117,20 @@ export default function Onboarding() {
                 className="flex flex-col items-center text-center gap-6"
               >
                 {renderIcon('mic', micState)}
- 
+
                 <div className="flex flex-col gap-3">
                   <h3 className="text-2xl font-display font-medium">Allow microphone access</h3>
                   <p className="text-body text-[var(--color-text-secondary)] leading-relaxed">
                     We use your microphone to capture spoken sentences so the 3D avatar can sign them. Your audio is analyzed in real time on your device and is never stored.
                   </p>
                 </div>
- 
+
                 {micState === 'denied' && (
                   <p className="text-caption text-[var(--color-error)] bg-[var(--color-error-tint)] border border-[var(--color-error)]/20 rounded-[var(--radius-sm)] px-4 py-2.5">
                     Microphone access is blocked. Open your browser&apos;s site settings to allow it, then refresh the page.
                   </p>
                 )}
- 
+
                 <div className="w-full pt-2">
                   {micState === 'denied' ? (
                     <Button variant="primary" onClick={handleMicRequest} className="w-full">

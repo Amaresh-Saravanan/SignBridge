@@ -121,8 +121,8 @@ export default function Hub() {
             <span className="text-caption text-[var(--color-text-secondary)] bg-[var(--color-surface-elevated)] border border-[var(--color-border)] px-2.5 py-1 rounded-[var(--radius-sm)]">
               {dialectLabel}
             </span>
-            <span 
-              className="text-caption text-[var(--color-text-secondary)] bg-[var(--color-surface-elevated)] border border-[var(--color-accent)]/20 px-2.5 py-1 rounded-[var(--radius-sm)] flex items-center gap-1.5 cursor-help transition-all hover:border-[var(--color-accent)]/45" 
+            <span
+              className="text-caption text-[var(--color-text-secondary)] bg-[var(--color-surface-elevated)] border border-[var(--color-accent)]/20 px-2.5 py-1 rounded-[var(--radius-sm)] flex items-center gap-1.5 cursor-help transition-all hover:border-[var(--color-accent)]/45"
               title="Warm & Friendly: Adjusts avatar facial expressions to be more encouraging and approachable. Change in Settings."
             >
               😊 Warm &amp; Friendly tone
@@ -149,7 +149,7 @@ export default function Hub() {
           </div>
         </div>
       </div>
- 
+
       {/* Two-zone layout: ~55% input / ~45% avatar */}
       <div className="flex-1 max-w-[1280px] w-full mx-auto px-6 md:px-12 py-10 grid grid-cols-1 lg:grid-cols-12 gap-10">
         {/* Input zone — stacks above avatar on mobile */}
@@ -170,7 +170,7 @@ export default function Hub() {
                 layoutId="hub-mode-toggle"
               />
             </div>
- 
+
             <ProcessingPulse active={isProcessing} className="flex-1 rounded-[var(--radius-default)]">
               <div className="flex-1 bg-[var(--color-bg-base)] border border-[var(--color-border)] rounded-[var(--radius-default)] overflow-hidden relative min-h-[280px] h-full">
                 <AnimatePresence mode="wait">
@@ -186,7 +186,7 @@ export default function Hub() {
                 </AnimatePresence>
               </div>
             </ProcessingPulse>
- 
+
             {hubMode === 'speak' ? (
               <div className="flex flex-col gap-4">
                 {transcript && (
@@ -255,7 +255,7 @@ export default function Hub() {
             )}
           </div>
         </div>
- 
+
         {/* Avatar + captions zone */}
         <div className="lg:col-span-5 flex flex-col gap-4 order-2">
           <ProcessingPulse active={isProcessing || isSigning} className="rounded-[var(--radius-default)] flex-1">
@@ -281,7 +281,7 @@ export default function Hub() {
               </div>
             </div>
           </ProcessingPulse>
- 
+
           <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-default)] p-4 flex flex-col gap-3 shadow-card min-h-[160px] max-h-[240px] overflow-hidden">
             <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
               <span className="text-caption font-semibold">Live Captions</span>
@@ -300,7 +300,7 @@ export default function Hub() {
           </div>
 
           {/* Report Incorrect Sign button */}
-          <div className="border-t border-[var(--color-border)] pt-4 mt-4">
+          <div className="border-t border-[var(--color-border)] pt-4">
             <Button
               variant="ghost"
               className="w-full text-caption text-[var(--color-error)] hover:bg-[var(--color-error)]/10 flex items-center justify-center gap-2 min-h-[44px] rounded-[var(--radius-sm)]"

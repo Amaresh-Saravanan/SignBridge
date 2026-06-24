@@ -15,7 +15,7 @@ export default function Auth() {
       <motion.div
         layout
         transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-        className="relative z-10 w-full max-w-[420px] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-default)] p-6 md:p-8 shadow-card overflow-hidden"
+        className="relative z-10 w-full max-w-[420px] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-6 md:p-8 shadow-card overflow-hidden"
       >
         <div className="flex flex-col items-center gap-2 mb-6 md:mb-8">
           <h2 className="h2 font-display tracking-tight">SignBridge</h2>

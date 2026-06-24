@@ -42,6 +42,7 @@ export default function Settings() {
           type="button"
           onClick={() => navigate('/hub')}
           className="inline-flex items-center gap-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors cursor-pointer outline-none group"
+          aria-label="Go back to Hub"
         >
           <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-0.5" />
           Back to Hub
@@ -51,7 +52,7 @@ export default function Settings() {
           <h1 className="h1 font-display">Settings</h1>
           <p className="text-body text-[var(--color-text-secondary)]">Manage your language translation settings and avatar preferences</p>
         </div>
- 
+
         {/* Section 1: Language */}
         <section className="flex flex-col gap-5 p-6 rounded-[var(--radius-lg)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-card">
           <div className="flex items-center gap-2 pb-2 border-b border-[var(--color-border)]">
@@ -71,7 +72,7 @@ export default function Settings() {
             </p>
           </div>
         </section>
- 
+
         {/* Section 2: Context Presets */}
         <section className="flex flex-col gap-5 p-6 rounded-[var(--radius-lg)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-card">
           <div className="flex items-center gap-2 pb-2 border-b border-[var(--color-border)]">
@@ -101,7 +102,7 @@ export default function Settings() {
             </div>
           </div>
         </section>
- 
+
         {/* Section 3: Avatar Customization */}
         <section className="flex flex-col gap-5 p-6 rounded-[var(--radius-lg)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-card">
           <div className="flex items-center gap-2 pb-2 border-b border-[var(--color-border)]">
@@ -113,7 +114,7 @@ export default function Settings() {
               <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">
                 Customize the signing avatar&apos;s physical appearance and presentation style to suit your visual preference.
               </p>
-              
+
               <div className="flex flex-col gap-2.5">
                 <label className="text-auth-label text-[var(--color-text-secondary)] font-semibold">Skin tone</label>
                 <div className="flex gap-2.5 flex-wrap">
@@ -134,7 +135,7 @@ export default function Settings() {
                 </div>
                 <p className="text-[11px] text-[var(--color-text-secondary)]">Adjust skin tone styling for visual clarity.</p>
               </div>
- 
+
               <div className="flex flex-col gap-2.5">
                 <label className="text-auth-label text-[var(--color-text-secondary)] font-semibold">Outfit color</label>
                 <div className="flex gap-2.5 flex-wrap">
@@ -155,7 +156,7 @@ export default function Settings() {
                 </div>
                 <p className="text-[11px] text-[var(--color-text-secondary)]">Choose outfit clothing colors to personalize the avatar.</p>
               </div>
- 
+
               <div className="flex flex-col gap-2.5 pt-4 border-t border-[var(--color-border)]">
                 <label className="text-auth-label text-[var(--color-text-secondary)] font-semibold">Expression style</label>
                 <div className="grid grid-cols-2 gap-3 select-none">
@@ -187,7 +188,7 @@ export default function Settings() {
                 </p>
               </div>
             </div>
- 
+
             <div className="h-64 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-[var(--radius-lg)] overflow-hidden relative shadow-card">
               <span className="absolute top-3 left-3 z-10 text-caption text-[var(--color-text-secondary)] bg-[var(--color-surface)] px-2.5 py-1 rounded-[var(--radius-sm)] border border-[var(--color-border)]">Live preview</span>
               <Canvas camera={{ position: [0, 0.4, 1.4], fov: 40 }} className="w-full h-full">

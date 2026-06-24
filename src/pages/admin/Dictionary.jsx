@@ -109,7 +109,8 @@ export default function Dictionary() {
         {/* Back link */}
         <button
           onClick={() => navigate('/hub')}
-          className="inline-flex items-center gap-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent-teal)] transition-colors cursor-pointer outline-none group"
+          className="inline-flex items-center gap-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors cursor-pointer outline-none group"
+          aria-label="Go back to Hub"
         >
           <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-0.5" />
           Back to Hub
@@ -118,7 +119,7 @@ export default function Dictionary() {
         {/* Dictionary Info & Actions */}
         <div className="w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex flex-col gap-1">
-            <h1 className="text-3xl font-bold tracking-tight">ISL Dictionary Mapping</h1>
+            <h1 className="h1 font-display tracking-tight">ISL Dictionary Mapping</h1>
             <p className="text-sm text-[var(--color-text-secondary)]">Manage Indian Sign Language word keypoints and animations</p>
           </div>
 

@@ -60,10 +60,10 @@ export default function LoginForm({ onToggleMode }) {
       onSubmit={handleSubmit}
       className="flex flex-col gap-6"
     >
-      <h3 className="text-center text-[var(--color-text-primary)]">Welcome back</h3>
+      <h3 className="h3 font-display text-center text-[var(--color-text-primary)]">Welcome back</h3>
 
       {authError && (
-        <div className="bg-[var(--color-error-tint)] border border-[var(--color-error-shade)] rounded-[var(--radius-sm)] px-4 py-3 text-sm text-[var(--color-error-shade)]">
+        <div role="alert" className="bg-[var(--color-error-tint)] border border-[var(--color-error-shade)] rounded-[var(--radius-sm)] px-4 py-3 text-sm text-[var(--color-error-shade)]">
           {authError}
         </div>
       )}
