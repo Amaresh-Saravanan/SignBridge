@@ -13,6 +13,7 @@ import Onboarding from './pages/Onboarding'
 import Hub from './pages/Hub'
 import Settings from './pages/Settings'
 import History from './pages/History'
+import DesignSystem from './pages/DesignSystem'
 
 import Dictionary from './pages/admin/Dictionary'
 import Collector from './pages/admin/Collector'
@@ -70,6 +71,7 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/about" element={<About />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/design-system" element={<DesignSystem />} />
 
           {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>

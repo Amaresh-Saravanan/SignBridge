@@ -68,11 +68,13 @@
   --text-body: 16px;
   --text-caption: 13px;
 
-  /* Standardized radius scale */
-  --radius-default: 12px;
-  --radius-input: 8px;
+  /* Standardized radius scale for Glassmorphic Cards */
   --radius-sm: 8px;
-  --radius-lg: 20px;
+  --radius-default: 12px;
+  --radius-input: 12px;
+  --radius-inner: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
   --radius-pill: 9999px;
 
   --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.2);

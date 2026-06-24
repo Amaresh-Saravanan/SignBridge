@@ -37,7 +37,7 @@ export default function Button({
       <button
         type={type}
         disabled
-        className={`inline-flex items-center justify-center gap-2 px-6 py-3 rounded-[var(--radius-default)] text-base cursor-not-allowed bg-[var(--color-border)] text-[var(--color-text-disabled)] transition-none min-h-[44px] ${className}`}
+        className={`inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-base cursor-not-allowed bg-[var(--color-border)] text-[var(--color-text-disabled)] transition-none min-h-[44px] ${className}`}
         {...props}
       >
         {loading && <Loader2 className="w-4 h-4 animate-spin" />}
@@ -53,7 +53,7 @@ export default function Button({
       whileTap={{ scale: 0.97 }}
       transition={{ type: 'spring', stiffness: 400, damping: 20 }}
       onClick={onClick}
-      className={`inline-flex items-center justify-center gap-2 px-6 py-3 rounded-[var(--radius-default)] text-base cursor-pointer transition-all duration-150 min-h-[44px] ${v.base} ${v.hover} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-base cursor-pointer transition-all duration-150 min-h-[44px] ${v.base} ${v.hover} ${className}`}
       {...props}
     >
       {loading && <Loader2 className="w-4 h-4 animate-spin" />}

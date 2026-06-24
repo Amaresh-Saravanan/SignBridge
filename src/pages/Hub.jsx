@@ -112,207 +112,112 @@ export default function Hub() {
   ]
 
   return (
-    <PageWrapper className="relative min-h-screen text-[var(--color-text-primary)] flex flex-col">
-      {/* Top bar */}
-      <div className="border-b border-[var(--color-border)] bg-[var(--color-surface)] py-3.5 px-6">
-        <div className="max-w-[1280px] mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 flex-wrap select-none">
-            <Badge role={role} />
-            <span className="text-caption text-[var(--color-text-secondary)] bg-[var(--color-surface-elevated)] border border-[var(--color-border)] px-2.5 py-1 rounded-[var(--radius-sm)]">
-              {dialectLabel}
-            </span>
-            <span
-              className="text-caption text-[var(--color-text-secondary)] bg-[var(--color-surface-elevated)] border border-[var(--color-accent)]/20 px-2.5 py-1 rounded-[var(--radius-sm)] flex items-center gap-1.5 cursor-help transition-all hover:border-[var(--color-accent)]/45"
-              title="Warm & Friendly: Adjusts avatar facial expressions to be more encouraging and approachable. Change in Settings."
+    <PageWrapper className="relative min-h-screen bg-[var(--color-bg-base)] text-[var(--color-text-primary)] flex flex-col">
+      
+      {/* Top Navigation Bar */}
+      <div className="absolute top-0 left-0 w-full z-50 flex items-center justify-between p-6 pointer-events-none">
+        <button 
+          onClick={() => navigate('/settings')}
+          className="w-10 h-10 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center pointer-events-auto backdrop-blur-md"
+        >
+          <Settings size={20} />
+        </button>
+        {isAdmin && (
+          <Button variant="secondary" onClick={() => navigate('/admin/dashboard')} className="!py-1.5 !px-4 !min-h-0 !text-xs pointer-events-auto backdrop-blur-md rounded-full shadow-lg">
+            Admin
+          </Button>
+        )}
+      </div>
+
+      {/* Top Zone: 3D Avatar Area */}
+      <div className="relative w-full h-[50vh] min-h-[400px] bg-[var(--color-surface)] rounded-b-[40px] shadow-elevated flex items-center justify-center overflow-visible border-b border-[var(--color-border)]">
+        
+        {/* ISL Dropdown Pill */}
+        <div className="absolute top-6 right-6 z-20 flex items-center gap-1.5 px-3 py-1.5 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-full text-caption font-semibold shadow-card cursor-pointer hover:border-[var(--color-accent)] transition-colors backdrop-blur-md">
+          <span className="text-[16px] leading-none">🇮🇳</span> ISL
+          <svg className="w-3 h-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+
+        {/* 3D Canvas */}
+        <div className="w-full h-full pb-8 pt-4">
+          <Canvas camera={{ position: [0, 0, 3.2], fov: 40 }} className="w-full h-full">
+            <ambientLight intensity={0.7} />
+            <directionalLight position={[5, 10, 5]} intensity={1.5} />
+            <pointLight position={[-5, 5, -5]} intensity={0.5} />
+            <HubAvatar />
+          </Canvas>
+        </div>
+
+        {/* Processing Badge Overlay */}
+        <AnimatePresence>
+          {(isProcessing || isSigning) && (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+              className="absolute top-20 left-1/2 -translate-x-1/2 z-30 px-3 py-1 rounded-full bg-[var(--color-bg-base)] border border-[var(--color-accent)]/30 text-[11px] uppercase tracking-wider font-bold shadow-lg"
             >
-              😊 Warm &amp; Friendly tone
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link to="/history" title="History & phrasebook">
-              <Button variant="ghost" className="!p-2.5 min-h-[40px] min-w-[40px] border border-[var(--color-border)] hover:border-[var(--color-accent)]/20 rounded-[var(--radius-default)]" aria-label="History & phrasebook">
-                <History size={18} />
-              </Button>
-            </Link>
-            <Link to="/settings" title="Settings">
-              <Button variant="ghost" className="!p-2.5 min-h-[40px] min-w-[40px] border border-[var(--color-border)] hover:border-[var(--color-accent)]/20 rounded-[var(--radius-default)]" aria-label="Settings">
-                <Settings size={18} />
-              </Button>
-            </Link>
-            {isAdmin && (
-              <Link to="/admin/dashboard">
-                <Button variant="secondary" className="!py-2 !px-3 !text-xs ml-1 min-h-[40px]">
-                  Admin
-                </Button>
-              </Link>
-            )}
-          </div>
+              {isProcessing ? (
+                <span className="text-[var(--color-warning)] animate-pulse">Processing…</span>
+              ) : (
+                <span className="text-[var(--color-accent)] animate-pulse">Signing…</span>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Overlapping Circular Camera Feed */}
+        <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-24 h-24 rounded-full border-4 border-[var(--color-bg-base)] overflow-hidden bg-[var(--color-surface-elevated)] shadow-[0_12px_24px_rgba(0,0,0,0.4)] z-30 flex items-center justify-center">
+           <div className="w-full h-full scale-[1.5]">
+             <CameraPreview active={true} />
+           </div>
         </div>
       </div>
 
-      {/* Two-zone layout: ~55% input / ~45% avatar */}
-      <div className="flex-1 max-w-[1280px] w-full mx-auto px-6 md:px-12 py-10 grid grid-cols-1 lg:grid-cols-12 gap-10">
-        {/* Input zone — stacks above avatar on mobile */}
-        <div className="lg:col-span-7 flex flex-col gap-6 order-1">
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-6 md:p-8 flex flex-col gap-6 shadow-card flex-1">
-            <div className="flex items-center justify-between gap-3 flex-wrap pb-2 border-b border-[var(--color-border)]">
-              <div className="flex items-center gap-3">
-                <h3 className="h3 font-display">Source Input</h3>
-                <WaveformMotif state={isListening ? 'listening' : isSigning ? 'active' : 'idle'} size={24} />
-              </div>
-              <SegmentedControl
-                options={[
-                  { value: 'speak', label: '🎤 Speak' },
-                  { value: 'sign', label: '✋ Sign' },
-                ]}
-                value={hubMode}
-                onChange={setHubMode}
-                layoutId="hub-mode-toggle"
-              />
-            </div>
-
-            <ProcessingPulse active={isProcessing} className="flex-1 rounded-[var(--radius-default)]">
-              <div className="flex-1 bg-[var(--color-bg-base)] border border-[var(--color-border)] rounded-[var(--radius-default)] overflow-hidden relative min-h-[280px] h-full">
-                <AnimatePresence mode="wait">
-                  {hubMode === 'speak' ? (
-                    <motion.div key="waveform" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full p-6 min-h-[280px]">
-                      <MicWaveform active={isListening} />
-                    </motion.div>
-                  ) : (
-                    <motion.div key="camera" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full min-h-[280px]">
-                      <CameraPreview active={hubMode === 'sign'} />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </ProcessingPulse>
-
-            {hubMode === 'speak' ? (
-              <div className="flex flex-col gap-4">
-                {transcript && (
-                  <div className="flex flex-col gap-3 p-4 bg-[var(--color-accent-soft)] text-[var(--color-text-primary)] border border-[var(--color-accent)]/10 rounded-[var(--radius-default)] min-h-[80px] text-left">
-                    <div className="flex items-center justify-between">
-                      <span className="text-caption font-semibold uppercase tracking-wider text-[var(--color-accent)]">Live Transcript</span>
-                      <span
-                        className="text-caption font-semibold px-2 py-0.5 rounded-full bg-[var(--color-surface)] text-[var(--color-accent)] border border-[var(--color-border)] cursor-help"
-                        title="Avatar expressions adjust dynamically to match a friendly and encouraging tone."
-                      >
-                        😊 Friendly &amp; Warm tone
-                      </span>
-                    </div>
-                    <p className="text-body leading-relaxed font-medium">
-                      &ldquo;{transcript}&rdquo;
-                    </p>
-                  </div>
-                )}
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={toggleListening}
-                    className={`w-14 h-14 rounded-full flex items-center justify-center shrink-0 transition-all cursor-pointer ${
-                      isListening
-                        ? 'bg-[var(--color-error)] text-white shadow-lg'
-                        : 'bg-[var(--color-accent)] text-[var(--color-bg-base)] shadow-md hover:brightness-110'
-                    }`}
-                    title={isListening ? 'Stop listening' : 'Start speaking'}
-                  >
-                    {isListening ? <MicOff size={24} /> : <Mic size={24} />}
-                  </button>
-                  <form
-                    onSubmit={(e) => { e.preventDefault(); handleHearingTranslation(inputText) }}
-                    className="flex-1 flex gap-3"
-                  >
-                    <input
-                      type="text"
-                      placeholder="Or type a phrase for the avatar to sign…"
-                      value={inputText}
-                      onChange={(e) => setInputText(e.target.value)}
-                      className="flex-1 px-4 py-3 rounded-[var(--radius-input)] bg-[var(--color-surface-elevated)] text-body border border-[var(--color-border)] focus:border-[var(--color-accent)] outline-none min-h-[56px]"
-                    />
-                    <Button type="submit" variant="secondary" className="!p-4 shrink-0 min-h-[56px] min-w-[56px] flex items-center justify-center rounded-[var(--radius-input)]">
-                      <Send size={18} />
-                    </Button>
-                  </form>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-3">
-                <span className="text-xs uppercase tracking-wider font-bold text-[var(--color-text-secondary)]">Demo gesture triggers:</span>
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                  {demoPhrases.map((phrase) => (
-                    <button
-                      key={phrase.text}
-                      type="button"
-                      onClick={() => handleDeafSignGesture(phrase.text)}
-                      disabled={isProcessing}
-                      className="px-2 py-2.5 text-caption font-semibold rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface-elevated)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-all cursor-pointer disabled:opacity-40 min-h-[44px]"
-                    >
-                      {phrase.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+      {/* Interaction Controls Zone */}
+      <div className="w-full flex-1 flex flex-col items-center pt-20 px-6 pb-6 gap-6 max-w-[500px] mx-auto">
+        
+        {/* Glowing Mic Button */}
+        <div className="relative">
+          {/* Ambient Glow */}
+          <div className={`absolute inset-0 rounded-full bg-[var(--color-accent)] opacity-30 blur-xl transition-all duration-500 ${isListening ? 'scale-[1.8] animate-pulse' : 'scale-[1.2]'}`} />
+          
+          <button
+            onClick={toggleListening}
+            className={`relative z-10 w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 ${
+              isListening 
+                ? 'bg-[var(--color-accent)] text-[var(--color-bg-base)] scale-95 shadow-[inset_0_4px_8px_rgba(0,0,0,0.3)]' 
+                : 'bg-gradient-to-b from-[var(--color-accent)] to-[#b57a34] text-[var(--color-bg-base)] shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_8px_24px_rgba(201,138,62,0.4)] hover:brightness-110'
+            }`}
+          >
+            {isListening ? <MicOff size={32} /> : <Mic size={32} />}
+          </button>
         </div>
 
-        {/* Avatar + captions zone */}
-        <div className="lg:col-span-5 flex flex-col gap-4 order-2">
-          <ProcessingPulse active={isProcessing || isSigning} className="rounded-[var(--radius-default)] flex-1">
-            <div className="bg-[var(--color-surface-alt)] border border-[var(--color-border)] rounded-[var(--radius-default)] overflow-hidden flex flex-col relative min-h-[280px] shadow-card flex-1 p-4">
-              <div className="absolute top-7 right-7 z-20 pointer-events-none">
-                <span className="text-caption uppercase font-semibold px-2 py-0.5 rounded-[var(--radius-sm)] bg-[var(--color-surface)] border border-[var(--color-border)]">
-                  {isProcessing ? (
-                    <span className="text-[var(--color-warning)]">Processing…</span>
-                  ) : isSigning ? (
-                    <span className="text-[var(--color-accent)]">Signing…</span>
-                  ) : (
-                    <span className="text-[var(--color-text-secondary)]">Idle</span>
-                  )}
-                </span>
-              </div>
-              <div className="flex-1 w-full min-h-[240px] aspect-[4/3]">
-                <Canvas camera={{ position: [0, 0, 3.2], fov: 40 }} className="w-full h-full">
-                  <ambientLight intensity={0.7} />
-                  <directionalLight position={[5, 10, 5]} intensity={1.5} />
-                  <pointLight position={[-5, 5, -5]} intensity={0.5} />
-                  <HubAvatar />
-                </Canvas>
-              </div>
-            </div>
-          </ProcessingPulse>
+        {/* Text Input Pill */}
+        <div className="w-full relative mt-2">
+           <form onSubmit={(e) => { e.preventDefault(); handleHearingTranslation(inputText) }}>
+             <input
+               type="text"
+               placeholder="Type your manualting..."
+               value={inputText}
+               onChange={(e) => setInputText(e.target.value)}
+               className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-full px-6 py-4 text-sm focus:border-[var(--color-accent)] outline-none shadow-card backdrop-blur-md placeholder:text-[var(--color-text-disabled)]"
+             />
+           </form>
+        </div>
 
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-default)] p-4 flex flex-col gap-3 shadow-card min-h-[160px] max-h-[240px] overflow-hidden">
-            <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
-              <span className="text-caption font-semibold">Live Captions</span>
-              <button
-                type="button"
-                onClick={clearCaptions}
-                className="text-caption text-[var(--color-text-secondary)] hover:text-[var(--color-error)] transition-colors cursor-pointer min-h-[44px] px-2"
-              >
-                Clear
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto">
-              <LiveCaptions />
-            </div>
-            <p className="text-caption text-[var(--color-text-disabled)]">Tap and hold a caption to copy</p>
+        {/* Real-time Transcript Window */}
+        <div className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-5 shadow-elevated flex flex-col flex-1 max-h-[350px] min-h-[250px] backdrop-blur-md">
+          <div className="flex items-center justify-center pb-4 mb-2">
+            <span className="text-sm font-semibold text-[var(--color-text-primary)]">Real-time transcript</span>
           </div>
-
-          {/* Report Incorrect Sign button */}
-          <div className="border-t border-[var(--color-border)] pt-4">
-            <Button
-              variant="ghost"
-              className="w-full text-caption text-[var(--color-error)] hover:bg-[var(--color-error)]/10 flex items-center justify-center gap-2 min-h-[44px] rounded-[var(--radius-sm)]"
-              onClick={() => alert('Sign reported. Thank you for your feedback!')}
-            >
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              Report incorrect sign
-            </Button>
+          
+          <div className="flex-1 overflow-y-auto">
+             <LiveCaptions />
           </div>
         </div>
+        
       </div>
     </PageWrapper>
   )
