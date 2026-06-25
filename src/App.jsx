@@ -40,8 +40,8 @@ function AppLayout() {
   
   // Clean chrome setup:
   // Hide footer on dashboard-like pages to maximize vertical viewport space
-  const hideNav = ['/auth', '/onboarding'].includes(location.pathname)
-  const hideFooter = ['/auth', '/onboarding', '/hub', '/settings', '/history', '/admin/dictionary', '/admin/collector', '/admin/dashboard'].includes(location.pathname)
+  const hideNav = ['/', '/auth', '/onboarding'].includes(location.pathname)
+  const hideFooter = ['/', '/auth', '/onboarding', '/hub', '/settings', '/history', '/admin/dictionary', '/admin/collector', '/admin/dashboard'].includes(location.pathname)
 
   return (
     <div className="flex flex-col min-h-screen bg-[var(--color-bg-base)] text-[var(--color-text-primary)]">
