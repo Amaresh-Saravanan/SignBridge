@@ -1,0 +1,32 @@
+## Task 01 Debug Log
+
+### Debugger: Not Required (Review PASSED)
+
+No debugging was needed for this task. The review passed on first attempt.
+
+---
+
+### Pre-existing Issues Found (Not in Scope)
+
+The following issues were found during lint verification but exist in files outside Task 01 scope:
+
+1. **LandingAvatar.jsx**: `Math.random()` calls in render — purity violation
+2. **ParticleField.jsx**: `Math.random()` calls in render — purity violation
+3. **RealisticAvatar.jsx**: `useRef` called in non-hook function `createFingerRefs`
+4. **History.jsx**: Multiple unused imports and variables
+5. **Onboarding.jsx**: Unused imports (useState, motion)
+6. **Collector.jsx**: Unused variable, setState in effect
+7. **Dashboard.jsx**: Unused imports
+8. **appStore.js**: Unused `get` parameter
+9. **authStore.js**: Unused parameters, empty block
+
+These are pre-existing issues that should be addressed in future tasks or a dedicated cleanup task.
+
+### Task 01 Issues Found and Fixed
+
+1. **Hub.jsx: Missing useNavigate** — Fixed by adding import and initialization
+2. **Hub.jsx: Unused imports** — Fixed by removing 8 unused imports
+3. **Hub.jsx: Unused variables** — Fixed by removing 7 unused variables
+4. **App.jsx: Unused import** — Fixed by removing unused useEffect import
+
+All fixes verified by build and lint. No regressions introduced.

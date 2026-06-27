@@ -1,0 +1,29 @@
+planner:
+  model: big-pickle
+
+researcher:
+  model: nemotron-3-ultra-free
+
+avatar:
+  model: mimo-v2.5-free
+
+blender:
+  model: north-mini-code-free
+
+animation:
+  model: mimo-v2.5-free
+
+react:
+  model: deepseek-v4-flash-free
+
+backend:
+  model: deepseek-v4-flash-free
+
+reviewer:
+  model: nemotron-3-ultra-free
+
+debugger:
+  model: deepseek-v4-flash-free
+
+tester:
+  model: north-mini-code-free

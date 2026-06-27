@@ -1,0 +1,23 @@
+[
+  {
+    "bug_id": "BUG-001",
+    "description": "Three.js bone rotation snaps instantly, resulting in robotic motion.",
+    "root_cause": "Linear keyframe interpolation was used instead of spherical linear interpolation (SLERP).",
+    "fix": "Implement Quaternion SLERP inside useFrame loops to blend joint paths.",
+    "avoidance_rule": "Avoid linear rotation calculations on armature joints."
+  },
+  {
+    "bug_id": "BUG-002",
+    "description": "React state triggers infinite re-render loops inside R3F hooks.",
+    "root_cause": "Component state setters were called inside useFrame loop.",
+    "fix": "Use React refs instead of local state hooks to update mesh positions and rotations dynamically.",
+    "avoidance_rule": "Never call useState setters inside the R3F useFrame render loop."
+  },
+  {
+    "bug_id": "BUG-003",
+    "description": "GLB model loads blank in web canvas with no textures.",
+    "root_cause": "Texture files were referenced by absolute absolute local paths in Blender instead of relative embedded layout.",
+    "fix": "Pack textures directly inside the GLB container during Blender export.",
+    "avoidance_rule": "Always embed textures directly inside the GLB model binary."
+  }
+]

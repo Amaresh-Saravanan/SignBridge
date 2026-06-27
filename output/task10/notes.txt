@@ -1,0 +1,55 @@
+Task 10 - Frontend-Backend Integration
+=======================================
+Agent: React Agent
+Date: 2026-06-27
+Status: COMPLETE
+
+Summary
+-------
+Wired the Hub page to call the backend translation API and enqueue glosses
+for the animation engine.
+
+Changes Made
+------------
+1. src/pages/Hub.jsx (MODIFIED)
+   - Added enqueueGlosses and setSentenceType imports from appStore
+   - Updated handleHearingTranslation to call POST /api/translate
+   - Gloss tokens extracted from API response
+   - Glosses enqueued in appStore for animation engine
+   - NMM triggers (questions, negation) applied to sentenceType
+   - Error handling for API failures with fallback caption
+   - Dynamic signing duration based on gloss count
+
+Integration Flow
+----------------
+1. User speaks or types text
+2. handleHearingTranslation called
+3. POST /api/translate sent to backend
+4. Backend returns glosses array
+5. Gloss tokens extracted and enqueued
+6. HubAvatar dequeues and plays animations
+7. NMM triggers applied for facial expressions
+
+Build Status
+------------
+- npm run build: SUCCESS (787ms)
+- No compilation errors
+- Chunk size warning (pre-existing, not related to changes)
+
+API Integration
+---------------
+Endpoint: POST http://localhost:3001/api/translate
+Request: { "sentence": "I eat rice" }
+Response: {
+  "success": true,
+  "data": {
+    "glosses": [{ "token": "I" }, { "token": "EAT" }],
+    "nmm": { "eyebrows": "neutral", "head": "neutral" }
+  }
+}
+
+Error Handling
+--------------
+- API failure: Falls back to caption with "(translation failed)" suffix
+- Empty response: Skips animation enqueue
+- Network error: Caught and logged, signing not triggered
