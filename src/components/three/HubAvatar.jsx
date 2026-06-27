@@ -1,85 +1,97 @@
-import { useRef } from 'react'
+import { useRef, useEffect } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { useAppStore } from '../../stores/appStore'
 import { RealisticAvatar } from './RealisticAvatar'
+import { PoseBlender, createIdlePose } from '../../lib/poseBlender'
+import { getPoseForGloss, getNMMForSentenceType } from '../../lib/islAnimationMap'
 
-/**
- * Hub avatar — realistic humanoid that reacts to app state.
- * Idle: breathing and subtle sways. Processing: orbiting light. Signing: active gestures.
- */
+const BLEND_DURATION = 0.25
+const GLOSS_HOLD_TIME = 0.8
+const GLOSS_HOLD_MIN = 0.6
+const GLOSS_HOLD_MAX = 1.2
+
+const blender = new PoseBlender()
+blender.defaultDuration = BLEND_DURATION
+
 export default function HubAvatar() {
   const avatarRef = useRef()
   const lightRef = useRef()
 
   const isProcessing = useAppStore((s) => s.isProcessing)
-  const isSigning = useAppStore((s) => s.isSigning)
+  const currentGloss = useAppStore((s) => s.currentGloss)
+  const glossQueue = useAppStore((s) => s.glossQueue)
+  const sentenceType = useAppStore((s) => s.sentenceType)
+  const dequeueGloss = useAppStore((s) => s.dequeueGloss)
+  const setIsAnimating = useAppStore((s) => s.setIsAnimating)
+  const setCurrentGloss = useAppStore((s) => s.setCurrentGloss)
+
+  const blendState = useRef({
+    fromPose: createIdlePose(),
+    toPose: createIdlePose(),
+    elapsed: 0,
+    duration: BLEND_DURATION,
+    phase: 'idle',
+    holdTimer: 0,
+    holdDuration: GLOSS_HOLD_TIME,
+    nmmApplied: false,
+    lastGloss: null
+  })
+
+  const skinToneIndex = useAppStore((s) => s.skinTone)
+  const outfitColorIndex = useAppStore((s) => s.outfitColor)
+  const skinColor = ['#F5D0A9', '#E0B896', '#C69C7B', '#A67C5B', '#8B6340', '#5C3D2E'][skinToneIndex] || '#E0B896'
+  const bodyColor = ['#3FD6C0', '#7C8CFF', '#F87171', '#FBBF24'][outfitColorIndex] || '#3FD6C0'
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime()
     const rig = avatarRef.current
+    const bs = blendState.current
 
-    if (rig) {
-      // Breathing & subtle spine motion
-      if (rig.hips) {
-        rig.hips.position.y = 0.8 + Math.sin(t * 1.5) * 0.005
-      }
-      if (rig.head) {
-        rig.head.rotation.z = Math.sin(t * 0.5) * 0.02
-        rig.head.rotation.x = Math.sin(t * 0.8) * 0.01
-      }
+    if (!rig) return
 
-      if (isSigning) {
-        // Signing animation — active arms and fingers movements
-        if (rig.rightShoulder) {
-          rig.rightShoulder.rotation.z = 0.5 + Math.sin(t * 4) * 0.6
-          rig.rightShoulder.rotation.x = Math.sin(t * 3) * 0.3
+    if (bs.phase === 'blending') {
+      bs.elapsed += state.clock.getDelta()
+      const progress = Math.min(bs.elapsed / bs.duration, 1)
+      const eased = blender.easeInOutCubic(progress)
+
+      blender.blendPose(rig, bs.fromPose, bs.toPose, eased)
+
+      if (progress >= 1) {
+        bs.phase = 'holding'
+        bs.holdTimer = 0
+      }
+    } else if (bs.phase === 'holding') {
+      bs.holdTimer += state.clock.getDelta()
+
+      if (bs.holdTimer >= bs.holdDuration) {
+        bs.phase = 'returning'
+        bs.fromPose = extractCurrentPose(rig)
+        bs.toPose = createIdlePose()
+        bs.elapsed = 0
+        bs.duration = BLEND_DURATION
+        bs.nmmApplied = false
+      }
+    } else if (bs.phase === 'returning') {
+      bs.elapsed += state.clock.getDelta()
+      const progress = Math.min(bs.elapsed / bs.duration, 1)
+      const eased = blender.easeInOutCubic(progress)
+
+      blender.blendPose(rig, bs.fromPose, bs.toPose, eased)
+
+      if (progress >= 1) {
+        bs.phase = 'idle'
+        setIsAnimating(false)
+        setCurrentGloss(null)
+
+        if (glossQueue.length > 0) {
+          dequeueGloss()
         }
-        if (rig.leftShoulder) {
-          rig.leftShoulder.rotation.z = -0.5 - Math.sin(t * 3.5 + 1) * 0.5
-          rig.leftShoulder.rotation.x = Math.sin(t * 2.5 + 0.5) * 0.3
-        }
-        if (rig.rightElbow) rig.rightElbow.rotation.set(-0.5 + Math.sin(t * 3) * 0.2, 0, 0)
-        if (rig.leftElbow) rig.leftElbow.rotation.set(-0.5 + Math.sin(t * 3.2) * 0.2, 0, 0)
-
-        // Dynamic finger articulation during signing
-        ;[rig.leftFingers, rig.rightFingers].forEach((fingers) => {
-          if (!fingers) return
-          fingers.forEach((f, idx) => {
-            const amt = 1.0 + Math.sin(t * 5 + idx) * 0.4
-            if (f.knuckle) f.knuckle.rotation.x = amt * 0.5
-            if (f.mid) f.mid.rotation.x = amt * 0.6
-            if (f.tip) f.tip.rotation.x = amt * 0.45
-          })
-        })
-      } else {
-        // Idle pose with subtle breathing sways
-        if (rig.leftShoulder) rig.leftShoulder.rotation.set(0.1, 0, -0.15 + Math.sin(t) * 0.02)
-        if (rig.rightShoulder) rig.rightShoulder.rotation.set(0.1, 0, 0.15 - Math.sin(t) * 0.02)
-        if (rig.leftElbow) rig.leftElbow.rotation.set(-0.15, 0, 0)
-        if (rig.rightElbow) rig.rightElbow.rotation.set(-0.15, 0, 0)
-        if (rig.leftWrist) rig.leftWrist.rotation.set(0, 0, 0)
-        if (rig.rightWrist) rig.rightWrist.rotation.set(0, 0, 0)
-
-        // Reset fingers to neutral / slight curve
-        ;[rig.leftFingers, rig.rightFingers].forEach((fingers) => {
-          if (!fingers) return
-          fingers.forEach((f) => {
-            if (f.isThumb) {
-              const ry = f.knuckle.position.x > 0 ? 0.4 : -0.4
-              const rz = f.knuckle.position.x > 0 ? 0.5 : -0.5
-              if (f.knuckle) f.knuckle.rotation.set(0.3, ry, rz)
-            } else {
-              if (f.knuckle) f.knuckle.rotation.set(0.1, 0, 0)
-            }
-            if (f.mid) f.mid.rotation.set(0.1, 0, 0)
-            if (f.tip) f.tip.rotation.set(0.1, 0, 0)
-          })
-        })
       }
+    } else {
+      applyIdleMotion(rig, t)
     }
 
-    // Processing light orbit
     if (lightRef.current) {
       if (isProcessing) {
         lightRef.current.visible = true
@@ -92,25 +104,128 @@ export default function HubAvatar() {
     }
   })
 
-  const skinToneIndex = useAppStore((s) => s.skinTone)
-  const outfitColorIndex = useAppStore((s) => s.outfitColor)
+  useEffect(() => {
+    if (currentGloss && avatarRef.current && blendState.current.phase === 'idle') {
+      const pose = getPoseForGloss(currentGloss)
+      if (!pose) return
 
-  const skinColor = ['#F5D0A9', '#E0B896', '#C69C7B', '#A67C5B', '#8B6340', '#5C3D2E'][skinToneIndex] || '#E0B896'
-  const bodyColor = ['#3FD6C0', '#7C8CFF', '#F87171', '#FBBF24'][outfitColorIndex] || '#3FD6C0'
+      const rig = avatarRef.current
+      const bs = blendState.current
+
+      bs.fromPose = extractCurrentPose(rig)
+      bs.toPose = { ...pose }
+
+      if (sentenceType && !bs.nmmApplied) {
+        const nmm = getNMMForSentenceType(sentenceType)
+        if (nmm) {
+          bs.toPose = { ...bs.toPose, ...nmm }
+          bs.nmmApplied = true
+        }
+      }
+
+      bs.elapsed = 0
+      bs.duration = BLEND_DURATION
+      bs.holdDuration = GLOSS_HOLD_MIN + Math.random() * (GLOSS_HOLD_MAX - GLOSS_HOLD_MIN)
+      bs.phase = 'blending'
+      bs.lastGloss = currentGloss
+
+      setIsAnimating(true)
+    }
+  }, [currentGloss, sentenceType, dequeueGloss, setIsAnimating, setCurrentGloss])
+
+  useEffect(() => {
+    if (glossQueue.length > 0 && !currentGloss && blendState.current.phase === 'idle') {
+      dequeueGloss()
+    }
+  }, [glossQueue, currentGloss, dequeueGloss])
 
   return (
     <>
-      {/* Orbiting point light for processing state */}
       <pointLight ref={lightRef} color="#3FD6C0" intensity={3} distance={5} visible={false} />
 
       <group position={[0, -1.2, 0]}>
-        <RealisticAvatar 
-          ref={avatarRef} 
-          skinColor={skinColor} 
-          bodyColor={bodyColor} 
+        <RealisticAvatar
+          ref={avatarRef}
+          skinColor={skinColor}
+          bodyColor={bodyColor}
         />
       </group>
     </>
   )
 }
 
+function extractCurrentPose(rig) {
+  const tempQ = new THREE.Quaternion()
+  const pose = {}
+
+  const boneKeys = [
+    'hips', 'spine', 'chest', 'neck', 'head',
+    'leftShoulder', 'leftUpperArm', 'leftElbow', 'leftForearm', 'leftWrist', 'leftHand',
+    'rightShoulder', 'rightUpperArm', 'rightElbow', 'rightForearm', 'rightWrist', 'rightHand'
+  ]
+
+  boneKeys.forEach((key) => {
+    const bone = rig[key]
+    if (!bone) return
+    tempQ.copy(bone.quaternion)
+    pose[key] = {
+      quaternion: [tempQ.x, tempQ.y, tempQ.z, tempQ.w],
+      position: [bone.position.x, bone.position.y, bone.position.z]
+    }
+  })
+
+  ;['leftFingers', 'rightFingers'].forEach((handKey) => {
+    const fingers = rig[handKey]
+    if (!fingers) return
+    pose[handKey] = fingers.map((finger) => {
+      const result = {}
+      ;['knuckle', 'mid', 'tip'].forEach((jk) => {
+        const bone = finger[jk]
+        if (bone) {
+          tempQ.copy(bone.quaternion)
+          result[jk + '_quaternion'] = [tempQ.x, tempQ.y, tempQ.z, tempQ.w]
+        }
+      })
+      return result
+    })
+  })
+
+  pose.face = {
+    leftEyebrow: rig.leftEyebrow ? { rotation: [rig.leftEyebrow.rotation.x, rig.leftEyebrow.rotation.y, rig.leftEyebrow.rotation.z] } : { rotation: [0, 0, 0] },
+    rightEyebrow: rig.rightEyebrow ? { rotation: [rig.rightEyebrow.rotation.x, rig.rightEyebrow.rotation.y, rig.rightEyebrow.rotation.z] } : { rotation: [0, 0, 0] },
+    mouth: rig.mouth ? { rotation: [rig.mouth.rotation.x, rig.mouth.rotation.y, rig.mouth.rotation.z] } : { rotation: [0, 0, 0] }
+  }
+
+  return pose
+}
+
+function applyIdleMotion(rig, t) {
+  if (rig.hips) {
+    rig.hips.position.y = 0.8 + Math.sin(t * 1.5) * 0.005
+  }
+  if (rig.head) {
+    rig.head.rotation.z = Math.sin(t * 0.5) * 0.02
+    rig.head.rotation.x = Math.sin(t * 0.8) * 0.01
+  }
+  if (rig.leftShoulder) rig.leftShoulder.rotation.set(0.1, 0, -0.15 + Math.sin(t) * 0.02)
+  if (rig.rightShoulder) rig.rightShoulder.rotation.set(0.1, 0, 0.15 - Math.sin(t) * 0.02)
+  if (rig.leftElbow) rig.leftElbow.rotation.set(-0.15, 0, 0)
+  if (rig.rightElbow) rig.rightElbow.rotation.set(-0.15, 0, 0)
+  if (rig.leftWrist) rig.leftWrist.rotation.set(0, 0, 0)
+  if (rig.rightWrist) rig.rightWrist.rotation.set(0, 0, 0)
+
+  ;[rig.leftFingers, rig.rightFingers].forEach((fingers) => {
+    if (!fingers) return
+    fingers.forEach((f) => {
+      if (f.isThumb) {
+        const ry = f.knuckle.position.x > 0 ? 0.4 : -0.4
+        const rz = f.knuckle.position.x > 0 ? 0.5 : -0.5
+        if (f.knuckle) f.knuckle.rotation.set(0.3, ry, rz)
+      } else {
+        if (f.knuckle) f.knuckle.rotation.set(0.1, 0, 0)
+      }
+      if (f.mid) f.mid.rotation.set(0.1, 0, 0)
+      if (f.tip) f.tip.rotation.set(0.1, 0, 0)
+    })
+  })
+}

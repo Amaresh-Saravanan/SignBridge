@@ -1,0 +1,7 @@
+{
+  "project_name": "SignBridge",
+  "version": "1.0.0",
+  "objective": "Real-time English-to-Indian Sign Language translation using a 3D avatar",
+  "coding_style": "React 19 functional components, Zustand state stores, utility Tailwind CSS classes",
+  "animation_style": "Realistic proportions, 15 finger joint rigging, custom facial visemes, natural easing transitions"
+}

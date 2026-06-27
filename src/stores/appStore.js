@@ -25,6 +25,13 @@ export const useAppStore = create((set, get) => ({
   skinTone: 0,
   outfitColor: 0,
 
+  // Animation state
+  currentGloss: null,
+  glossQueue: [],
+  isAnimating: false,
+  sentenceType: null,
+  animProgress: 0,
+
   // History replay — set by History page, consumed by Hub on mount
   replayPhrase: null,
 
@@ -56,4 +63,19 @@ export const useAppStore = create((set, get) => ({
 
   setReplayPhrase: (phrase) => set({ replayPhrase: phrase }),
   clearReplayPhrase: () => set({ replayPhrase: null }),
+
+  setCurrentGloss: (gloss) => set({ currentGloss: gloss }),
+  setGlossQueue: (queue) => set({ glossQueue: queue }),
+  setIsAnimating: (v) => set({ isAnimating: v }),
+  setSentenceType: (type) => set({ sentenceType: type }),
+  setAnimProgress: (p) => set({ animProgress: p }),
+
+  enqueueGlosses: (glosses) => set((state) => ({
+    glossQueue: [...state.glossQueue, ...glosses]
+  })),
+  dequeueGloss: () => set((state) => {
+    const [next, ...rest] = state.glossQueue
+    return { currentGloss: next || null, glossQueue: rest }
+  }),
+  clearGlossQueue: () => set({ glossQueue: [], currentGloss: null, isAnimating: false }),
 }))

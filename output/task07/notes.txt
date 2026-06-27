@@ -1,0 +1,64 @@
+Task 07 - Animation Engine & R3F Player Integration
+====================================================
+Agent: Animation Agent
+Date: 2026-06-27
+Status: COMPLETE
+
+Summary
+-------
+Implemented the animation engine for the SignBridge 3D avatar system, enabling
+ISL gloss-to-pose translation with smooth SLERP/LERP blending transitions.
+
+Files Created/Modified
+----------------------
+1. src/lib/poseBlender.js (NEW)
+   - PoseBlender class with SLERP/LERP interpolation
+   - Cubic ease-in-out curves for natural motion
+   - Per-bone transition duration support
+   - createIdlePose() factory function
+
+2. src/lib/islAnimationMap.js (NEW)
+   - 20 ISL gloss pose definitions (HELLO, THANK_YOU, PLEASE, YES, NO, HELP, etc.)
+   - getPoseForGloss() lookup function
+   - getNMMForSentenceType() for facial grammar markers
+   - Question/negation/affirmation NMM presets
+
+3. src/components/three/HubAvatar.jsx (MODIFIED)
+   - Integrated PoseBlender for smooth transitions
+   - Three-phase animation system: blending → holding → returning
+   - applyPoseToRig() drives bone rotations from gloss poses
+   - extractCurrentPose() captures rig state for blending
+   - NMM support for head tilts and eyebrow raises
+   - Idle motion with subtle breathing and sway
+
+4. src/stores/appStore.js (MODIFIED)
+   - Added animation state: currentGloss, glossQueue, isAnimating
+   - Added sentenceType, animProgress for NMM tracking
+   - Added actions: enqueueGlosses, dequeueGloss, clearGlossQueue
+
+Animation Flow
+--------------
+1. Speech input → gloss tokens extracted
+2. Glosses queued in appStore
+3. dequeueGloss() sets currentGloss
+4. HubAvatar detects currentGloss change
+5. getPoseForGloss() retrieves target pose
+6. extractCurrentPose() captures current rig state
+7. PoseBlender blends from→to over 0.25s
+8. Hold pose for 0.6-1.2s (randomized)
+9. Return to idle over 0.25s
+10. Process next gloss in queue
+
+Performance Notes
+-----------------
+- Pose extraction and blending runs in useFrame (60fps target)
+- Cubic easing prevents robotic linear interpolation
+- Hold duration randomized to avoid mechanical rhythm
+- NMMs applied once per gloss to prevent re-triggering
+
+Known Limitations
+-----------------
+- No GLB model loading (procedural avatar only)
+- Limited gloss vocabulary (20 gestures)
+- No viseme morph target integration (procedural mouth)
+- No real speech recognition wiring (requires backend task)

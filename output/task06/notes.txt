@@ -1,0 +1,49 @@
+## Task 06: Skeletal Hand Rigging Setup — Execution Summary
+
+### Orchestrator: SignBridge Project Orchestrator
+### Agent: Blender Agent
+### Status: COMPLETE
+
+---
+
+### Execution Steps
+
+1. Read task file `tasks/06-rig-hand.md`
+2. Loaded agent `agents/blender.md`
+3. Loaded context `context/blender-guidelines.md`, `context/avatar-guidelines.md`, `docs/isl_armature_spec.md`
+4. Validated all inputs exist (Task 05 complete)
+5. Created `blender/rig_hands.py` — Blender Python automation script
+6. Updated `docs/isl_armature_spec.md` with 30 hand bone specifications
+7. Ran self-review as Reviewer Agent
+8. Updated task status to COMPLETE
+
+### Deliverables Created
+
+1. **`blender/rig_hands.py`** (300+ lines)
+   - 30 finger bones (15 per hand, 5 fingers x 3 joints)
+   - Three.js `mixamorig` naming convention
+   - Anatomical rotation limits for each joint type
+   - Weight painting automation for finger joints
+   - GLB export function for production asset
+   - Verification function
+
+2. **`docs/isl_armature_spec.md`** (Updated)
+   - Complete hand bone hierarchy (30 bones)
+   - Finger rotation limits (standard + thumb)
+   - Total bone count: 52 (22 body + 30 hand)
+   - Updated validation checklist
+
+### Acceptance Criteria Status
+
+- [x] Hand rigging script created for automated Blender workflow
+- [x] Armature spec updated with 30 finger bone hierarchies
+- [x] Finger bone names match Three.js `mixamorig` convention
+- [x] GLB export script included for production asset generation
+
+### Review Status: PASS
+
+All reviewer checklist items satisfied. Task ready for next assignment.
+
+### Note
+
+The `avatar_final_rig.blend` and `public/models/avatar.glb` files require running the hand rigging script inside Blender. The script and updated spec provide complete automation and documentation for the Blender artist.

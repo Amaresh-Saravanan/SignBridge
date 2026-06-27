@@ -1,17 +1,12 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Canvas } from '@react-three/fiber'
-import { Settings, History, Mic, MicOff, Send } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Settings, Mic, MicOff } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 import PageWrapper from '../components/layout/PageWrapper'
-import SegmentedControl from '../components/ui/SegmentedControl'
 import Button from '../components/ui/Button'
-import Badge from '../components/ui/Badge'
-import ProcessingPulse from '../components/ui/ProcessingPulse'
-import WaveformMotif from '../components/ui/WaveformMotif'
 
-import MicWaveform from '../components/hub/MicWaveform'
 import CameraPreview from '../components/hub/CameraPreview'
 import LiveCaptions from '../components/hub/LiveCaptions'
 import HubAvatar from '../components/three/HubAvatar'
@@ -19,39 +14,26 @@ import HubAvatar from '../components/three/HubAvatar'
 import { useAppStore } from '../stores/appStore'
 import { useAuthStore } from '../stores/authStore'
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition'
-import { dialects } from '../data/mockData'
 
 export default function Hub() {
+  const navigate = useNavigate()
   const { isAdmin } = useAuthStore()
 
-  const role = useAppStore((s) => s.role)
-  const dialect = useAppStore((s) => s.dialect)
   const isProcessing = useAppStore((s) => s.isProcessing)
   const isSigning = useAppStore((s) => s.isSigning)
   const isListening = useAppStore((s) => s.isListening)
-  const hubMode = useAppStore((s) => s.hubMode)
   const replayPhrase = useAppStore((s) => s.replayPhrase)
 
-  const setHubMode = useAppStore((s) => s.setHubMode)
   const setProcessing = useAppStore((s) => s.setProcessing)
   const setSigning = useAppStore((s) => s.setSigning)
   const setListening = useAppStore((s) => s.setListening)
   const addCaption = useAppStore((s) => s.addCaption)
-  const clearCaptions = useAppStore((s) => s.clearCaptions)
   const clearReplayPhrase = useAppStore((s) => s.clearReplayPhrase)
+  const enqueueGlosses = useAppStore((s) => s.enqueueGlosses)
+  const setSentenceType = useAppStore((s) => s.setSentenceType)
 
   const { transcript, isListening: isSpeechListening, start: startSpeech, stop: stopSpeech, setTranscript } = useSpeechRecognition()
   const [inputText, setInputText] = useState('')
-
-  const dialectLabel = dialects.find((d) => d.value === dialect)?.label || dialect
-
-  const speakText = (text) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel()
-      const utterance = new SpeechSynthesisUtterance(text)
-      window.speechSynthesis.speak(utterance)
-    }
-  }
 
   const triggerSigning = (text, source = 'hearing') => {
     addCaption({ text, source })
@@ -64,18 +46,42 @@ export default function Hub() {
     setInputText('')
     setTranscript('')
     setProcessing(true)
-    await new Promise((r) => setTimeout(r, 900))
-    setProcessing(false)
-    triggerSigning(textToTranslate, 'hearing')
-  }
 
-  const handleDeafSignGesture = async (signText) => {
-    if (isProcessing) return
-    setProcessing(true)
-    await new Promise((r) => setTimeout(r, 900))
-    setProcessing(false)
-    addCaption({ text: signText, source: 'deaf' })
-    speakText(signText)
+    try {
+      const response = await fetch('http://localhost:3001/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sentence: textToTranslate })
+      })
+
+      if (!response.ok) {
+        throw new Error('Translation failed')
+      }
+
+      const result = await response.json()
+
+      if (result.success && result.data.glosses.length > 0) {
+        const glossTokens = result.data.glosses.map(g => g.token)
+        enqueueGlosses(glossTokens)
+
+        if (result.data.nmm) {
+          const hasQuestion = result.data.nmm.eyebrows !== 'neutral'
+          const hasNegation = result.data.nmm.head === 'shaking'
+          if (hasQuestion) setSentenceType('yes_no_question')
+          else if (hasNegation) setSentenceType('negation')
+          else setSentenceType(null)
+        }
+      }
+
+      addCaption({ text: textToTranslate, source: 'hearing' })
+      setSigning(true)
+      setTimeout(() => setSigning(false), glossTokens.length * 1200)
+    } catch (error) {
+      console.error('Translation error:', error)
+      addCaption({ text: textToTranslate + ' (translation failed)', source: 'hearing' })
+    } finally {
+      setProcessing(false)
+    }
   }
 
   // Replay phrase from History page
@@ -100,16 +106,6 @@ export default function Hub() {
       startSpeech()
     }
   }
-
-  const demoPhrases = [
-    { text: 'Hello', label: 'Hello' },
-    { text: 'Thank you', label: 'Thank you' },
-    { text: 'Water', label: 'Water' },
-    { text: 'Help', label: 'Help' },
-    { text: 'Doctor', label: 'Doctor' },
-    { text: 'Yes', label: 'Yes' },
-    { text: 'No', label: 'No' },
-  ]
 
   return (
     <PageWrapper className="relative min-h-screen bg-[var(--color-bg-base)] text-[var(--color-text-primary)] flex flex-col">
