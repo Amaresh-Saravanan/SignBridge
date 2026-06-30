@@ -1,843 +1,423 @@
-# 3D Avatar System - Technical Design Plan (TDP)
+# SignBridge — 3D Avatar Technical Design Plan (TDP)
+**Last Updated:** July 1, 2026 | **Phase:** 1 — Foundation
 
-## Document Overview
+---
 
-This document provides a comprehensive technical design for building and enhancing the 3D avatar system for the SignBridge project. It covers architecture, data structures, implementation strategies, and integration points.
+## Reference Images (Read These First)
+
+```
+assets/reference/
+├── front.png   → Cartoon 3D avatar, front view with proportions
+├── side.png    → Side profile — arm rest position, body depth
+├── style.png   → Top-down view — shoulder/head width ratio
+└── hands.png   → Hand model sheet — MCP/PIP/DIP joints, topology
+```
+
+**Style verdict:** Stylized cartoon 3D (Pixar-adjacent). Rounded, friendly, compact proportions. NOT hyper-realistic.
 
 ---
 
 ## 1. System Architecture
 
-### 1.1 High-Level Architecture
-
 ```
-┌─────────────────────────────────────────────────────┐
-│          SignBridge Application Layer               │
-├─────────────────────────────────────────────────────┤
-│  UI Layer (React Components)                        │
-│  ├─ AvatarDisplay Component                         │
-│  ├─ AvatarControls Component                        │
-│  └─ CustomizationPanel Component                    │
-├─────────────────────────────────────────────────────┤
-│  Avatar System Layer                                │
-│  ├─ Avatar Renderer (React Three Fiber)             │
-│  ├─ Animation Controller                            │
-│  ├─ Gesture Manager                                 │
-│  ├─ Pose Blender                                    │
-│  └─ State Management (Zustand)                      │
-├─────────────────────────────────────────────────────┤
-│  Data Layer                                         │
-│  ├─ Gesture Database (islAnimationMap.js)           │
-│  ├─ Avatar Config (colors, dimensions)              │
-│  └─ LocalStorage Cache                              │
-├─────────────────────────────────────────────────────┤
-│  Three.js / WebGL                                   │
-└─────────────────────────────────────────────────────┘
-```
-
-### 1.2 Component Hierarchy
-
-```
-AvatarContainer (Page/View)
-├─ AvatarDisplay
-│  └─ Canvas (React Three Fiber)
-│     └─ RealisticAvatar (3D Model)
-│        ├─ Head Group
-│        │  ├─ Face Mesh
-│        │  ├─ Eyebrows
-│        │  ├─ Eyes
-│        │  ├─ Mouth
-│        │  └─ Hair
-│        ├─ Torso Group
-│        │  ├─ Chest Mesh
-│        │  ├─ Spine
-│        │  └─ Arms (Left/Right)
-│        │     ├─ Shoulder
-│        │     ├─ Upper Arm
-│        │     ├─ Elbow
-│        │     ├─ Forearm
-│        │     ├─ Wrist
-│        │     ├─ Hand
-│        │     └─ Fingers (5 per hand)
-│        └─ Legs
-├─ AvatarControls
-│  ├─ PlayButton
-│  ├─ PauseButton
-│  ├─ SpeedSlider
-│  ├─ TimelineDisplay
-│  └─ RepeatButton
-└─ CustomizationPanel
-   ├─ SkinColorPicker
-   ├─ ClothingColorPicker
-   ├─ HairColorPicker
-   └─ CameraAngleSelector
+┌──────────────────────────────────────────────────┐
+│              Hub.jsx (Page)                      │
+│  ┌──────────────────┐  ┌────────────────────┐   │
+│  │   Canvas (R3F)   │  │  Dev Test Panel    │   │
+│  │  ┌────────────┐  │  │  - Gesture buttons │   │
+│  │  │ HubAvatar  │  │  │  - Sentence input  │   │
+│  │  │            │  │  │  - Skin/outfit     │   │
+│  │  │ Realistic  │  │  │  - Status badge    │   │
+│  │  │ Avatar     │  │  └────────────────────┘   │
+│  │  └────────────┘  │                            │
+│  │  OrbitControls   │                            │
+│  └──────────────────┘                            │
+├──────────────────────────────────────────────────┤
+│              State Layer                         │
+│  appStore.js — glossQueue, currentGloss,         │
+│                skinTone, outfitColor,            │
+│                isAnimating, sentenceType         │
+├──────────────────────────────────────────────────┤
+│              Animation Layer                     │
+│  HubAvatar.jsx     — orchestrates per-frame loop │
+│  poseBlender.js    — SLERP quaternion blending   │
+│  islAnimationMap.js — 22+ gesture pose database │
+├──────────────────────────────────────────────────┤
+│              Geometry Layer                      │
+│  RealisticAvatar.jsx — procedural 3D model       │
+│                        (no .glb file)            │
+│  Three.js primitives: SphereGeometry,            │
+│  CylinderGeometry, BoxGeometry                   │
+└──────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 2. Core Module Design
+## 2. File Map
 
-### 2.1 Avatar Model (RealisticAvatar Component)
+### Existing Files (Do Not Break)
 
-**Purpose**: Render the 3D avatar with proper skeletal structure
+| File | Purpose | Status |
+|------|---------|--------|
+| `src/components/three/RealisticAvatar.jsx` | Procedural 3D avatar geometry + rig | ✅ Working |
+| `src/components/three/HubAvatar.jsx` | Animation loop + pose state machine | ✅ Working |
+| `src/lib/islAnimationMap.js` | 22 gesture poses as quaternions | ✅ Working |
+| `src/lib/poseBlender.js` | SLERP blending between poses | ✅ Working |
+| `src/stores/appStore.js` | Global gesture queue + avatar state | ✅ Working |
+| `src/pages/Hub.jsx` | Dev workspace UI + Canvas | ✅ Working |
+| `src/pages/Landing.jsx` | Homepage | ✅ Working |
+| `src/App.jsx` | Routing (/ → Landing, /hub → Hub) | ✅ Working |
 
-**Key Responsibilities**:
-- Create and manage 3D geometry (head, body, limbs, fingers)
-- Expose skeletal references for animation system
-- Apply materials and textures
-- Handle shadow casting and lighting
+### Files to Create (Phase 2+)
 
-**Structure**:
-```javascript
-// Current: src/components/three/RealisticAvatar.jsx
-// Props:
-// - skinColor: hex color
-// - bodyColor: hex color
-// - pantsColor: hex color
-// - hairColor: hex color
-// Exposed via useImperativeHandle:
-// - hips, spine, chest, neck, head (body joints)
-// - leftShoulder, leftElbow, leftWrist, leftHand (arm chains)
-// - rightShoulder, rightElbow, rightWrist, rightHand (arm chains)
-// - leftFingers/rightFingers (finger articulation arrays)
-// - face properties (eyebrows, mouth)
+| File | Purpose | Priority |
+|------|---------|----------|
+| `src/lib/quaternionUtils.js` | Helper functions for quaternion math | HIGH |
+| `src/lib/easingFunctions.js` | Easing curves (easeInOutCubic, etc.) | HIGH |
+| `src/lib/gestureCache.js` | Pre-compute animation frames for speed | MEDIUM |
+| `src/hooks/useAvatarAnimation.js` | React hook wrapping animation state | MEDIUM |
+
+---
+
+## 3. RealisticAvatar — Geometry Specification
+
+### Based on `assets/reference/front.png` and `side.png`
+
+All units are in Three.js world units. Avatar total height ≈ 2.4 units.
+
+```
+AVATAR PROPORTIONS (from reference)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Head:        radius 0.28,  center at y=1.5
+  Neck:        radius 0.10,  y=1.15 to 1.25
+  Torso:       width 0.38,   y=0.55 to 1.15
+  Hips:        width 0.32,   y=0.30 to 0.60
+  Upper arm:   length 0.28,  radius 0.07
+  Forearm:     length 0.25,  radius 0.06
+  Hand/palm:   width 0.12,   length 0.10
+  Upper leg:   length 0.35,  radius 0.09
+  Lower leg:   length 0.32,  radius 0.07
+  Foot:        length 0.14,  radius 0.05
 ```
 
-**Enhancement Opportunities**:
-- [ ] Add LOD (Level of Detail) system for mobile
-- [ ] Implement morphing targets for facial expressions
-- [ ] Add clothing as separate mesh groups for better customization
-- [ ] Support blend shapes for mouth shapes (phonemes)
+### Hand Geometry (Critical — from `hands.png`)
 
-### 2.2 Animation System
-
-**Purpose**: Apply keyframe animations and pose blending
-
-**Components**:
-
-#### A. Gesture Pose Manager (`islAnimationMap.js`)
-- Stores quaternion-based poses for each gesture
-- Maps text to animation poses
-- Returns facial expression states
-- Supports sentence-level markers (questions, negations, etc.)
+Reference shows: **Stylized cartoon hand, 4 fingers + thumb, 3 joints each (MCP, PIP, DIP)**
 
 ```javascript
-// Current structure:
-GLOSS_POSES = {
-  HELLO: {
-    rightShoulder: { quaternion: [...] },
-    rightElbow: { quaternion: [...] },
-    rightWrist: { quaternion: [...] },
-    rightFingers: [
-      { knuckle_quaternion, mid_quaternion, tip_quaternion },
-      // ... 5 fingers total
-    ],
-    face: {
-      leftEyebrow: { rotation: [...] },
-      rightEyebrow: { rotation: [...] },
-      mouth: { rotation: [...] }
-    }
-  },
-  // ... 30+ more gestures
+// Per finger: 3 bone segments
+// MCP = MetaCarpoPhalangeal (knuckle)  — base of finger
+// PIP = Proximal InterPhalangeal       — mid joint
+// DIP = Distal InterPhalangeal         — tip joint
+
+// Finger dimensions (approximate from reference)
+FINGER_SEGMENTS = {
+  thumb:  { mcp: 0.06, pip: 0.05, dip: 0.04, radius: 0.025 },
+  index:  { mcp: 0.07, pip: 0.06, dip: 0.04, radius: 0.022 },
+  middle: { mcp: 0.08, pip: 0.065,dip: 0.045,radius: 0.022 },
+  ring:   { mcp: 0.07, pip: 0.06, dip: 0.04, radius: 0.020 },
+  pinky:  { mcp: 0.055,pip: 0.04, dip: 0.03, radius: 0.018 },
 }
 
-// Functions:
-- getPoseForGloss(gloss): returns pose object
-- getAvailableGlosses(): returns array of gesture names
-- getNMMForSentenceType(type): returns non-manual markers
+// Thumb offset from palm: ~45° palmar abduction
+// Finger spread in rest pose: slight fan (0° to 5° between fingers)
 ```
 
-**Enhancement Needed**:
-- [ ] Add animation curves/easing (keyframe interpolation)
-- [ ] Add gesture duration metadata
-- [ ] Add transition poses between gestures
-- [ ] Support gesture variations (regional differences)
+### useImperativeHandle Exposed API
 
-#### B. Animation Controller
-**Purpose**: Execute animations on the avatar
-
-**Responsibilities**:
-- Interpolate between poses using quaternion SLERP
-- Handle gesture timing and sequencing
-- Manage playback state (playing, paused, stopped)
-- Apply easing functions
-
-**New Component to Create**:
-```javascript
-// File: src/lib/animationController.js
-
-class AnimationController {
-  constructor(avatarRef, gestureDatabase) {
-    this.avatarRef = avatarRef
-    this.gestureDb = gestureDatabase
-    this.currentAnimation = null
-    this.playbackState = 'stopped' // playing, paused, stopped
-    this.playbackSpeed = 1.0
-    this.currentFrame = 0
-    this.totalFrames = 0
-    this.frameRate = 60
-  }
-
-  // Core methods
-  playGesture(gloss, duration = 1000)
-  playSequence(glosses, durations)
-  pause()
-  resume()
-  stop()
-  setPlaybackSpeed(speed)
-  
-  // Internal methods
-  interpolatePose(startPose, endPose, progress)
-  applyPoseToAvatar(pose)
-  updateFrame(deltaTime)
-}
-```
-
-#### C. Pose Blender (`poseBlender.js`)
-**Current**: Already exists, blends multiple poses
-
-**Enhancements Needed**:
-- [ ] Add inverse kinematics for natural arm positioning
-- [ ] Support blend weights for smooth transitions
-- [ ] Add constraint satisfaction for hand positions
-- [ ] Optimize quaternion interpolation
-
-### 2.3 State Management (Zustand Store)
-
-**Purpose**: Manage avatar state globally
-
-**File**: `src/stores/avatarStore.js` (new)
+`RealisticAvatar` exposes these refs for animation:
 
 ```javascript
-const useAvatarStore = create((set) => ({
-  // Avatar Configuration
-  avatarConfig: {
-    skinColor: '#ffd2b1',
-    bodyColor: '#5ba0d0',
-    pantsColor: '#203884',
-    hairColor: '#422a14',
-  },
-  updateAvatarConfig: (config) => set((state) => ({
-    avatarConfig: { ...state.avatarConfig, ...config }
-  })),
+// Body skeleton
+ref.hips         // THREE.Group — root, controls whole body position
+ref.spine        // THREE.Group
+ref.chest        // THREE.Group
+ref.neck         // THREE.Group
+ref.head         // THREE.Group
 
-  // Animation State
-  animationState: {
-    currentGloss: null,
-    queue: [],
-    isPlaying: false,
-    currentTime: 0,
-    duration: 0,
-    playbackSpeed: 1.0,
-  },
-  setAnimationState: (state) => set({ animationState: state }),
+// Left arm chain
+ref.leftShoulder   // THREE.Group
+ref.leftUpperArm   // THREE.Group
+ref.leftElbow      // THREE.Group
+ref.leftForearm    // THREE.Group
+ref.leftWrist      // THREE.Group
+ref.leftHand       // THREE.Group
 
-  // UI State
-  showControls: true,
-  cameraAngle: 'front', // front, 3q, side
-  highContrast: false,
-  
-  // Methods
-  playGesture: (gloss) => {},
-  stopAnimation: () => {},
-  toggleHighContrast: () => set((state) => ({
-    highContrast: !state.highContrast
-  })),
-}))
+// Right arm chain (mirror)
+ref.rightShoulder, ref.rightUpperArm, ref.rightElbow,
+ref.rightForearm,  ref.rightWrist,    ref.rightHand
+
+// Finger arrays: each contains { knuckle, mid, tip, isThumb }
+ref.leftFingers    // Array[5]
+ref.rightFingers   // Array[5]
+
+// Face
+ref.leftEyebrow    // THREE.Mesh — rotation.z for raise/lower
+ref.rightEyebrow   // THREE.Mesh
+ref.mouth          // THREE.Mesh — rotation.x for open/close
 ```
 
 ---
 
-## 3. Data Flow & Interactions
-
-### 3.1 Gesture Playback Flow
+## 4. HubAvatar — Animation State Machine
 
 ```
-User Input (text)
-    ↓
-NLP Parser / Tokenizer
-    ↓
-Convert to Glosses (array of sign names)
-    ↓
-AvatarStore.playSequence(glosses)
-    ↓
-AnimationController.playSequence()
-    ↓
-For each gloss:
-  - Get pose from GLOSS_POSES
-  - Calculate interpolation curve
-  - For each frame:
-    - Calculate current pose (slerp interpolation)
-    - Apply pose to avatar skeleton
-    - Render frame
-    ↓
-Animation Complete
+States: idle → blending → holding → returning → idle
+
+idle:
+  - applyIdleMotion() runs each frame
+  - Watches glossQueue for next gesture
+
+blending (250ms):
+  - SLERP from fromPose → toPose
+  - easeInOutCubic applied
+  - On complete → holding
+
+holding (600–1200ms):
+  - Avatar frozen at gesture peak
+  - Duration varies per gloss (random jitter ±300ms for natural feel)
+  - On complete → returning
+
+returning (250ms):
+  - SLERP from current pose → idlePose
+  - On complete → idle
+  - Triggers next gloss from queue if any
+
+NMM injection:
+  - When sentenceType is set, inject into toPose before blending
+  - 'yes_no_question' → eyebrows raised
+  - 'negation' → head shake added
 ```
 
-### 3.2 Customization Flow
+### Key Constants
 
-```
-User selects color (e.g., skin tone)
-    ↓
-ColorPicker onChange event
-    ↓
-useAvatarStore.updateAvatarConfig({ skinColor: newColor })
-    ↓
-Zustand triggers re-render
-    ↓
-RealisticAvatar receives new prop
-    ↓
-Mesh materials update color
-    ↓
-Three.js re-renders scene
-```
-
-### 3.3 Playback Control Flow
-
-```
-User clicks Play
-    ↓
-AvatarControls.onPlayClick()
-    ↓
-AnimationController.play()
-    ↓
-AnimationLoop (requestAnimationFrame):
-  - Calculate elapsed time
-  - Update frame based on deltaTime
-  - Apply pose interpolation
-  - Render frame
-    ↓
-User clicks Pause
-    ↓
-AnimationController.pause()
-    ↓
-AnimationLoop stops updating frame position
+```javascript
+BLEND_DURATION   = 0.25   // seconds — transition speed
+GLOSS_HOLD_MIN   = 0.6    // seconds — minimum hold time
+GLOSS_HOLD_MAX   = 1.2    // seconds — maximum hold time
 ```
 
 ---
 
-## 4. Implementation Details
+## 5. Gesture Pose Format
 
-### 4.1 Quaternion-Based Pose System
+All poses stored in `src/lib/islAnimationMap.js`:
 
-**Why Quaternions?**
-- Avoid gimbal lock (unlike Euler angles)
-- Smooth interpolation (SLERP - Spherical Linear Interpolation)
-- Compact representation (4 values instead of 9 for matrices)
-
-**Implementation**:
 ```javascript
-// SLERP (Spherical Linear Interpolation)
-function slerp(qa, qb, t) {
-  // Quaternion linear interpolation
-  // qa: start quaternion [x, y, z, w]
-  // qb: end quaternion [x, y, z, w]
-  // t: progress (0.0 to 1.0)
-  
-  const dotProduct = qa[0]*qb[0] + qa[1]*qb[1] + qa[2]*qb[2] + qa[3]*qb[3]
-  
-  if (dotProduct < 0) {
-    qb = [-qb[0], -qb[1], -qb[2], -qb[3]]
-  }
-  
-  // Clamp to avoid numerical errors
-  let safeProduct = Math.max(-1, Math.min(1, dotProduct))
-  const theta = Math.acos(safeProduct)
-  const sinTheta = Math.sin(theta)
-  
-  if (sinTheta < 0.001) return qa // Fallback to linear interpolation
-  
-  const scale1 = Math.sin((1 - t) * theta) / sinTheta
-  const scale2 = Math.sin(t * theta) / sinTheta
-  
-  return [
-    scale1 * qa[0] + scale2 * qb[0],
-    scale1 * qa[1] + scale2 * qb[1],
-    scale1 * qa[2] + scale2 * qb[2],
-    scale1 * qa[3] + scale2 * qb[3],
-  ]
-}
+// Quaternion format: [x, y, z, w]
+// identity (no rotation) = [0, 0, 0, 1]
 
-// Apply quaternion to Three.js object
-const quat = new THREE.Quaternion(...quaternionArray)
-bone.quaternion.copy(quat)
-```
+HELLO: {
+  // Arm joints
+  rightShoulder: { quaternion: [x, y, z, w], position: [x, y, z] },
+  rightUpperArm: { quaternion: [...] },
+  rightElbow:    { quaternion: [...] },
+  rightForearm:  { quaternion: [...] },
+  rightWrist:    { quaternion: [...] },
+  rightHand:     { quaternion: [...] },
 
-### 4.2 Animation Keyframing
+  // Fingers: array of 5, each with knuckle/mid/tip
+  rightFingers: [
+    { knuckle_quaternion: [...], mid_quaternion: [...], tip_quaternion: [...] },
+    // × 5 fingers (thumb, index, middle, ring, pinky)
+  ],
 
-**Gesture Duration Strategy**:
-- Most gestures: 800-1200ms
-- Quick gestures (YES, NO): 600ms
-- Slow gestures (SCHOOL): 1500ms
-- Transitions between gestures: 200-300ms
-
-**Easing Functions**:
-```javascript
-const EasingFunctions = {
-  linear: (t) => t,
-  easeInOut: (t) => t < 0.5 ? 2*t*t : -1+(4-2*t)*t,
-  easeOut: (t) => 1 - Math.pow(1 - t, 3),
-  easeIn: (t) => t * t * t,
-}
-
-// Apply easing to gesture animation
-function interpolateFrame(startPose, endPose, progress, easing = 'easeInOut') {
-  const easedProgress = EasingFunctions[easing](progress)
-  return blendPoses(startPose, endPose, easedProgress)
-}
-```
-
-### 4.3 Performance Optimization Strategies
-
-#### A. Gesture Caching
-```javascript
-class GestureCache {
-  constructor() {
-    this.cache = new Map()
-  }
-  
-  getOrCreate(gloss, duration, easing) {
-    const key = `${gloss}_${duration}_${easing}`
-    if (this.cache.has(key)) {
-      return this.cache.get(key)
-    }
-    
-    // Pre-compute interpolated keyframes
-    const keyframes = this.computeKeyframes(gloss, duration, easing)
-    this.cache.set(key, keyframes)
-    return keyframes
-  }
-  
-  computeKeyframes(gloss, duration, easing) {
-    const fps = 60
-    const frameCount = Math.ceil(duration / 1000 * fps)
-    const keyframes = []
-    
-    const startPose = getPoseForGloss(gloss)
-    const endPose = getRestPose()
-    
-    for (let i = 0; i < frameCount; i++) {
-      const progress = i / frameCount
-      const easedProgress = EasingFunctions[easing](progress)
-      const frame = interpolatePose(startPose, endPose, easedProgress)
-      keyframes.push(frame)
-    }
-    
-    return keyframes
+  // Non-manual markers
+  face: {
+    leftEyebrow:  { rotation: [x, y, z] },  // Euler rotation
+    rightEyebrow: { rotation: [x, y, z] },
+    mouth:        { rotation: [x, y, z] },
   }
 }
 ```
 
-#### B. Level of Detail (LOD)
-```javascript
-// Reduce geometry complexity on mobile
-const shouldUseLOD = isMobileDevice()
+### Available Gestures (22 total)
 
-if (shouldUseLOD) {
-  // Use lower polygon count for fingers
-  const fingerGeometry = new THREE.CylinderGeometry(radius, radius, length, 8) // 8 segments
-} else {
-  const fingerGeometry = new THREE.CylinderGeometry(radius, radius, length, 16) // 16 segments
-}
 ```
-
-#### C. Memory Management
-```javascript
-class AvatarRenderer {
-  dispose() {
-    // Clean up Three.js resources
-    this.geometry.dispose()
-    this.materials.forEach(m => m.dispose())
-    this.textures.forEach(t => t.dispose())
-    this.renderer.dispose()
-  }
-}
-
-// Call on component unmount
-useEffect(() => {
-  return () => avatarRenderer.dispose()
-}, [])
+HELLO, THANK_YOU, PLEASE, YES, NO, HELP, WATER, FOOD,
+HOME, SCHOOL, DOCTOR, GOOD, BAD, I, YOU, NOT, WHERE,
+NOW, TOMORROW, YESTERDAY, EAT, GO
 ```
 
 ---
 
-## 5. File Structure & Organization
-
-### Proposed Directory Layout
-```
-signbridge/
-├── src/
-│   ├── components/
-│   │   ├── three/
-│   │   │   ├── RealisticAvatar.jsx (existing)
-│   │   │   ├── AvatarDisplay.jsx (new)
-│   │   │   ├── AvatarScene.jsx (new - Canvas wrapper)
-│   │   │   └── AvatarEnvironment.jsx (new - lighting, background)
-│   │   ├── avatar-ui/
-│   │   │   ├── AvatarControls.jsx (new)
-│   │   │   ├── CustomizationPanel.jsx (new)
-│   │   │   ├── TimelineDisplay.jsx (new)
-│   │   │   └── SpeedControl.jsx (new)
-│   │   └── ...existing components
-│   ├── lib/
-│   │   ├── islAnimationMap.js (existing)
-│   │   ├── poseBlender.js (existing)
-│   │   ├── animationController.js (new)
-│   │   ├── quaternionUtils.js (new)
-│   │   ├── easingFunctions.js (new)
-│   │   └── gestureCache.js (new)
-│   ├── stores/
-│   │   ├── appStore.js (existing)
-│   │   ├── avatarStore.js (new)
-│   │   └── ...existing stores
-│   ├── hooks/
-│   │   ├── useAvatarAnimation.js (new)
-│   │   ├── useAvatarCustomization.js (new)
-│   │   └── ...existing hooks
-│   └── pages/
-│       ├── Hub.jsx (integrate avatar)
-│       └── ...existing pages
-└── ...project root files
-```
-
----
-
-## 6. Key Implementation Components
-
-### 6.1 AvatarDisplay Component (New)
+## 6. SLERP Quaternion Blending
 
 ```javascript
-// src/components/three/AvatarDisplay.jsx
-import { Canvas } from '@react-three/fiber'
-import { RealisticAvatar } from './RealisticAvatar'
-import { useAvatarStore } from '@/stores/avatarStore'
+// In poseBlender.js — this is how animation works
 
-export function AvatarDisplay() {
-  const avatarConfig = useAvatarStore(state => state.avatarConfig)
-  const avatarRef = useRef()
+// For each bone in the pose:
+blendPose(rig, fromPose, toPose, t) {
+  for (const key of BONE_KEYS) {
+    const from = fromPose[key]
+    const to   = toPose[key]
+    if (!from || !to || !rig[key]) continue
 
-  return (
-    <div className="avatar-display-container">
-      <Canvas
-        camera={{ position: [0, 0.5, 1.5], fov: 50 }}
-        gl={{ antialias: true, powerPreference: 'high-performance' }}
-      >
-        <ambientLight intensity={0.7} />
-        <directionalLight position={[2, 3, 2]} intensity={1} />
-        <RealisticAvatar
-          ref={avatarRef}
-          {...avatarConfig}
-        />
-      </Canvas>
-    </div>
-  )
-}
-```
+    // SLERP quaternion
+    const q = new THREE.Quaternion(...from.quaternion)
+    q.slerp(new THREE.Quaternion(...to.quaternion), t)
+    rig[key].quaternion.copy(q)
 
-### 6.2 AnimationController Hook (New)
-
-```javascript
-// src/hooks/useAvatarAnimation.js
-import { useRef, useCallback, useEffect } from 'react'
-import { AnimationController } from '@/lib/animationController'
-
-export function useAvatarAnimation(avatarRef) {
-  const controllerRef = useRef(null)
-
-  useEffect(() => {
-    if (!avatarRef.current) return
-    controllerRef.current = new AnimationController(avatarRef.current)
-  }, [])
-
-  const playGesture = useCallback((gloss) => {
-    controllerRef.current?.playGesture(gloss)
-  }, [])
-
-  const playSequence = useCallback((glosses) => {
-    controllerRef.current?.playSequence(glosses)
-  }, [])
-
-  return {
-    playGesture,
-    playSequence,
-    pause: () => controllerRef.current?.pause(),
-    resume: () => controllerRef.current?.resume(),
-    stop: () => controllerRef.current?.stop(),
-  }
-}
-```
-
-### 6.3 AvatarControls Component (New)
-
-```javascript
-// src/components/avatar-ui/AvatarControls.jsx
-export function AvatarControls({ onPlay, onPause, onStop, currentTime, duration }) {
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [speed, setSpeed] = useState(1.0)
-
-  const handlePlayClick = () => {
-    setIsPlaying(true)
-    onPlay()
+    // LERP position
+    rig[key].position.lerpVectors(
+      new THREE.Vector3(...from.position),
+      new THREE.Vector3(...to.position),
+      t
+    )
   }
 
-  const handlePauseClick = () => {
-    setIsPlaying(false)
-    onPause()
-  }
+  // Blend fingers
+  blendFingers(rig.leftFingers,  fromPose.leftFingers,  toPose.leftFingers,  t)
+  blendFingers(rig.rightFingers, fromPose.rightFingers, toPose.rightFingers, t)
+}
 
-  return (
-    <div className="avatar-controls">
-      <button onClick={handlePlayClick} disabled={isPlaying}>
-        ▶ Play
-      </button>
-      <button onClick={handlePauseClick} disabled={!isPlaying}>
-        ⏸ Pause
-      </button>
-      <button onClick={onStop}>⏹ Stop</button>
-      
-      <div className="timeline">
-        <div className="progress-bar">
-          <div 
-            className="progress" 
-            style={{ width: `${(currentTime / duration) * 100}%` }}
-          />
-        </div>
-        <span>{formatTime(currentTime)} / {formatTime(duration)}</span>
-      </div>
-
-      <div className="speed-control">
-        <label>Speed:</label>
-        <select value={speed} onChange={(e) => setSpeed(parseFloat(e.target.value))}>
-          <option value={0.5}>0.5x</option>
-          <option value={1.0}>1.0x</option>
-          <option value={1.5}>1.5x</option>
-          <option value={2.0}>2.0x</option>
-        </select>
-      </div>
-    </div>
-  )
+// Easing applied BEFORE passing t:
+easeInOutCubic(t) {
+  return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3) / 2
 }
 ```
 
 ---
 
-## 7. Integration Points
+## 7. Skin & Outfit Color System
 
-### 7.1 With NLP/Text Processing
 ```javascript
-// In Hub page or converter component
-const userText = "Hello, how are you?"
+// In HubAvatar.jsx — maps index → hex color
+SKIN_COLORS = [
+  '#F5D0A9',  // 0: Light
+  '#E0B896',  // 1: Medium (default — matches reference)
+  '#C69C7B',  // 2: Tan
+  '#A67C5B',  // 3: Brown
+  '#8B6340',  // 4: Deep
+  '#5C3D2E',  // 5: Dark
+]
 
-// 1. Convert text to glosses (sign language words)
-const glosses = nlpService.textToGlosses(userText)
-// Output: ['HELLO', 'HOW', 'YOU']
+BODY_COLORS = [
+  '#3FD6C0',  // 0: Teal (default — matches reference)
+  '#7C8CFF',  // 1: Blue
+  '#F87171',  // 2: Red
+  '#FBBF24',  // 3: Yellow
+]
 
-// 2. Play animation sequence
-useAvatarAnimation.playSequence(glosses)
+// appStore stores index (not hex)
+// HubAvatar reads index → maps to hex → passes to RealisticAvatar
 ```
 
-### 7.2 With Authentication & User Preferences
-```javascript
-// Store user's avatar customization preferences
-// On login, load from database
-useEffect(() => {
-  if (user) {
-    avatarStore.updateAvatarConfig(user.avatarPreferences)
-  }
-}, [user])
+---
 
-// Save when user changes settings
-const handleColorChange = (color) => {
-  avatarStore.updateAvatarConfig({ skinColor: color })
-  
-  // Save to backend
-  api.updateUserSettings({ avatarPreferences: avatarStore.getState().avatarConfig })
+## 8. Lighting Setup
+
+```javascript
+// Current lighting in Hub.jsx (matches reference model lighting)
+<ambientLight intensity={0.9} />
+<hemisphereLight intensity={0.7} groundColor="#08090c" />
+<directionalLight position={[4, 6, 4]} intensity={1.6} />          // Key light
+<directionalLight position={[-3, 4, 2]} intensity={0.5} color="#89a9ff" /> // Fill light (blue tint)
+```
+
+The blue-tinted fill light creates the soft shadow on the left side of the face, matching the reference image.
+
+---
+
+## 9. What to Build Next (Phase 2 Tasks)
+
+### Task 1: Improve Hand Geometry in RealisticAvatar.jsx
+**Current problem:** Fingers are too simple — single cylinder per finger  
+**Fix:** Add MCP + PIP + DIP as separate bone groups per finger (3 joints each, matching `hands.png`)
+
+```javascript
+// Replace current finger creation:
+function createFinger(scene, options) {
+  const group = new THREE.Group()
+
+  const mcp = new THREE.Mesh(fingerGeo, mat) // knuckle
+  const pip = new THREE.Mesh(fingerGeo, mat) // mid
+  const dip = new THREE.Mesh(fingerGeo, mat) // tip
+
+  mcp.add(pip)   // pip is child of mcp
+  pip.add(dip)   // dip is child of pip
+  group.add(mcp)
+
+  return { group, knuckle: mcp, mid: pip, tip: dip }
 }
 ```
 
-### 7.3 With Analytics
+### Task 2: Add Face Bones (Eyebrows + Mouth)
 ```javascript
-// Track gesture views and user engagement
-function trackGestureView(gloss) {
-  analytics.logEvent('gesture_viewed', {
-    gloss,
-    timestamp: Date.now(),
-    userId: currentUser.id,
-  })
-}
+// In RealisticAvatar.jsx face group
+const leftEyebrow  = new THREE.Mesh(eyebrowGeo, hairMat)
+const rightEyebrow = new THREE.Mesh(eyebrowGeo, hairMat)
+const mouth        = new THREE.Mesh(mouthGeo, mouthMat)
 
-// Call when gesture completes
-const handleGestureComplete = (gloss) => {
-  trackGestureView(gloss)
-}
+// Expose via useImperativeHandle
+handle.leftEyebrow  = leftEyebrow
+handle.rightEyebrow = rightEyebrow
+handle.mouth        = mouth
+```
+
+### Task 3: Add More Gestures to islAnimationMap.js
+Priority additions (50 total target):
+```
+FAMILY, FRIEND, WORK, STUDY, SLEEP, WAKE, COME, GO_HOME,
+MOTHER, FATHER, SISTER, BROTHER, LOVE, HAPPY, SAD, ANGRY,
+WANT, NEED, HAVE, GIVE, TAKE, SEE, HEAR, SPEAK, UNDERSTAND,
+NUMBER_1 through NUMBER_10, ALPHABET_A through ALPHABET_Z
+```
+
+### Task 4: Speed Control in Dev Panel
+```javascript
+// Add to appStore.js
+playbackSpeed: 1.0,
+setPlaybackSpeed: (speed) => set({ playbackSpeed: speed }),
+
+// Use in HubAvatar.jsx
+bs.duration = BLEND_DURATION / playbackSpeed
+bs.holdDuration = (GLOSS_HOLD_MIN + jitter) / playbackSpeed
 ```
 
 ---
 
-## 8. Testing Strategy
+## 10. Performance Budget
 
-### 8.1 Unit Tests
-- Quaternion interpolation functions
-- Pose blending logic
-- Easing function calculations
-- Gesture database lookups
-
-### 8.2 Component Tests
-- RealisticAvatar rendering
-- AvatarControls interactions
-- CustomizationPanel color changes
-- Animation state updates
-
-### 8.3 Integration Tests
-- End-to-end gesture playback
-- Sequence animation flow
-- State persistence
-- Customization persistence
-
-### 8.4 Performance Tests
-- Frame rate monitoring
-- Memory profiling
-- Load time benchmarks
-- Mobile device testing
-
-```javascript
-// Example test structure
-describe('AnimationController', () => {
-  it('should interpolate between poses smoothly', () => {
-    const controller = new AnimationController(avatarRef)
-    const startPose = { /* ... */ }
-    const endPose = { /* ... */ }
-    
-    const frame1 = controller.interpolatePose(startPose, endPose, 0.5)
-    expect(frame1).toBeDefined()
-    expect(frame1.quaternion).toBeDefined()
-  })
-})
-```
+| Resource | Budget | Current | Status |
+|----------|--------|---------|--------|
+| Avatar geometry (MB) | < 5 MB | ~2 MB | ✅ OK |
+| Gesture DB (KB) | < 500 KB | ~80 KB | ✅ OK |
+| Total memory (MB) | < 80 MB | ~45 MB | ✅ OK |
+| Frame time budget | 16ms (60fps) | ~12ms | ✅ OK |
+| Finger bones per hand | 15 (5×3) | 5 (1 per finger) | 🔴 Needs fix |
+| Gesture count | 100+ | 22 | 🔴 Needs expansion |
 
 ---
 
-## 9. Browser & Device Support
+## 11. Known Issues & Fixes
 
-### Desktop Support
-- Chrome 90+ (Primary)
-- Firefox 88+
-- Safari 14+
-- Edge 90+
-
-### Mobile Support
-- iOS Safari 14+
-- Chrome for Android 90+
-- Samsung Internet 14+
-- Firefox for Android 88+
-
-### Fallback Strategy
-```javascript
-// Detect WebGL support
-function hasWebGLSupport() {
-  const canvas = document.createElement('canvas')
-  return !!(
-    window.WebGLRenderingContext &&
-    (canvas.getContext('webgl') || canvas.getContext('experimental-webgl'))
-  )
-}
-
-// Show warning if not supported
-if (!hasWebGLSupport()) {
-  return <WebGLNotSupportedMessage />
-}
-```
+| Issue | Root Cause | Fix |
+|-------|-----------|-----|
+| Fingers look blocky | Single cylinder per finger, no joints | Add MCP/PIP/DIP segments |
+| No facial expressions yet | Eyebrow/mouth refs not in RealisticAvatar | Add face bones to rig |
+| NMMs injected but not visible | Face refs return undefined | Fix after face bones added |
+| Only 22 gestures | Limited pose data | Add 30+ more to islAnimationMap.js |
+| No speed control in UI | Not wired to playbackSpeed | Add slider to Hub dev panel |
 
 ---
 
-## 10. Future Enhancements (Post-MVP)
+## 12. Testing Checklist
 
-### Phase 2+
-- [ ] **Gesture Recording**: Allow users to record and save custom gestures
-- [ ] **Multi-Avatar Mode**: Show multiple signers for dialogue
-- [ ] **Sign Variation Display**: Show regional ISL variations
-- [ ] **Lip-Sync**: Animate mouth shapes matching speech
-- [ ] **Hand Pose Input**: Read pose from webcam using ML.js or TensorFlow
-- [ ] **Advanced Blending**: Natural IK-based arm positioning
-- [ ] **Character Selection**: Multiple avatar models/styles
-- [ ] **Clothes/Accessories**: Full wardrobe customization
-- [ ] **Environment Customization**: Different backgrounds and lighting
-- [ ] **Replay Recording**: Record and save gesture sequences
+### Per Gesture (run for all 22)
+- [ ] Gesture plays without console errors
+- [ ] Hand shape is recognizable as the intended ISL sign
+- [ ] Returns to idle without snapping
+- [ ] FPS stays ≥ 55 during animation
 
----
+### Per Feature
+- [ ] Sentence queue signs multiple words in order
+- [ ] Skin tone changes apply immediately
+- [ ] Outfit color changes apply immediately
+- [ ] Orbit controls work (drag = rotate, scroll = zoom)
+- [ ] Status badge shows correct current gloss
 
-## 11. Known Limitations & Challenges
-
-### Current Limitations
-1. **Hand Articulation**: Complex multi-finger movements difficult to capture
-2. **Body Movement**: Limited torso and hip movement in current rig
-3. **Performance**: Finger articulation on mobile still demanding
-4. **Animation Curves**: Linear interpolation between keyframes lacks organic feel
-
-### Technical Challenges
-1. **Quaternion Gimbal Lock**: Requires careful interpolation strategy
-2. **Hand Placement**: IK (Inverse Kinematics) not yet implemented
-3. **Performance on Mobile**: WebGL context switches are expensive
-4. **Gesture Variations**: Regional ISL differences not yet captured
-
-### Proposed Solutions
-- Implement IK solver for natural arm positioning
-- Use pre-computed keyframe cache to reduce calculations
-- Implement gesture variation metadata system
-- Add morph targets for complex finger shapes
-
----
-
-## 12. Success Criteria
-
-The implementation will be considered successful when:
-
-1. ✅ Avatar renders smoothly (60 FPS desktop, 30 FPS mobile)
-2. ✅ 30+ ISL gestures animate correctly
-3. ✅ Gesture sequences play without visual jank
-4. ✅ Non-manual markers display at correct times
-5. ✅ Customization persists across sessions
-6. ✅ Loads in < 2 seconds
-7. ✅ User testing shows > 4.5/5 satisfaction
-8. ✅ Achieves WebAIM accessibility score > 90
-9. ✅ Works on 95%+ of target browsers/devices
-10. ✅ Memory usage < 100MB
-
----
-
-## 13. Timeline
-
-| Phase | Duration | Deliverables |
-|-------|----------|---------------|
-| Phase 1: Foundation | 4 weeks | Animation controller, gesture caching, performance optimization |
-| Phase 2: Features | 4 weeks | Gesture sequencing, NMMs, customization |
-| Phase 3: Polish | 4 weeks | Accessibility, mobile optimization, testing |
-| Phase 4: Advanced | Ongoing | Recording, multi-avatar, variations |
-
----
-
-## 14. Appendix: Technical Reference
-
-### A. Quaternion Representation
-- Format: [x, y, z, w]
-- w is scalar, [x, y, z] is vector component
-- Example: `[0, 0, 0.707, 0.707]` = 90° rotation around Z axis
-
-### B. Three.js Integration
-```javascript
-// Convert quaternion array to Three.js Quaternion
-const quat = new THREE.Quaternion(x, y, z, w)
-
-// Apply to bone
-bone.quaternion.copy(quat)
-
-// Interpolate
-bone.quaternion.slerpQuaternions(qa, qb, t)
-```
-
-### C. Useful Links
-- Three.js Documentation: https://threejs.org/docs/
-- React Three Fiber: https://docs.pmnd.rs/react-three-fiber/
-- ISL Resources: https://www.islu.org/
-- WebGL Best Practices: https://www.khronos.org/webgl/
-
+### Performance
+- [ ] Chrome DevTools: average frame time < 16ms
+- [ ] Memory: heap snapshot < 80 MB
+- [ ] No memory leaks after 10+ gesture plays

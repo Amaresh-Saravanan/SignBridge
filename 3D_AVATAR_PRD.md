@@ -1,263 +1,221 @@
-# 3D Avatar System - Product Requirements Document (PRD)
-
-## Executive Summary
-Build an advanced 3D avatar system that demonstrates sign language (ISL) gestures in real-time for text-to-sign conversion. The avatar will serve as the primary visual representation of sign language translations, enabling deaf and hard-of-hearing users to understand sign language through an interactive 3D character.
+# SignBridge — 3D Avatar PRD
+**Last Updated:** July 1, 2026 | **Phase:** 1 — Foundation | **Status:** 🟡 In Progress
 
 ---
 
-## 1. Product Vision & Goals
+## Reference Model (Source of Truth)
 
-### Vision
-Create a realistic, expressive 3D avatar that brings sign language to life, making communication more accessible and intuitive for users learning or translating sign language.
+The avatar is based on the reference images in `assets/reference/`:
 
-### Goals
-- **Primary Goal**: Display accurate ISL gestures for given input words with smooth animations
-- **Engagement**: Create an engaging, lifelike avatar that users enjoy interacting with
-- **Accessibility**: Enable deaf and hard-of-hearing users to understand sign language easily
-- **Scalability**: Support expanding ISL vocabulary beyond initial 30+ words
-- **Performance**: Maintain 60 FPS smooth animations on various devices
+| View | File | Key Observations |
+|------|------|-----------------|
+| Front | `front.png` | Rounded cartoon style, big head, compact torso, arms slightly out |
+| Side | `side.png` | Slight belly curve, arms rest forward, no sharp edges |
+| Top | `style.png` | Wide shoulder-to-head ratio, arms at ~30° from body |
+| Hands | `hands.png` | Stylized hand, MCP/PIP/DIP joints clearly visible, 4 fingers + thumb |
 
----
-
-## 2. User Stories & Requirements
-
-### US1: Real-Time Sign Demonstration
-**As a** user learning sign language  
-**I want to** see a 3D avatar perform sign gestures  
-**So that** I can understand how to make the signs myself  
-
-**Acceptance Criteria:**
-- Avatar displays correct hand shapes for each word
-- Body posture and arm positions are accurate to ISL standards
-- Facial expressions match the sign emotion/intensity
-- Animations play smoothly (no jank or stuttering)
-- Gesture completes in 1-3 seconds per word
-
-### US2: Multi-Word Sentence Translation
-**As a** user  
-**I want to** see the avatar perform a complete sentence in sign language  
-**So that** I understand how multiple signs flow together  
-
-**Acceptance Criteria:**
-- Avatar chains multiple gestures seamlessly
-- Transitions between signs are fluid
-- Sentence-level non-manual markers (facial expressions) are applied
-- User can see the sentence timeline (current word highlight)
-- Can pause/resume/rewind gesture playback
-
-### US3: Customizable Avatar
-**As a** user  
-**I want to** customize the avatar's appearance (skin color, clothing, etc.)  
-**So that** I can see an avatar that represents me better  
-
-**Acceptance Criteria:**
-- Users can change skin tone
-- Users can change clothing colors
-- Users can change hair color
-- Customization persists across sessions
-- Avatar updates in real-time
-
-### US4: Gesture Clarity
-**As a** user with visual impairment  
-**I want** high-contrast avatar rendering and clear hand visibility  
-**So that** I can see the signs clearly  
-
-**Acceptance Criteria:**
-- High-contrast background options
-- Adjustable avatar size
-- Slow-motion playback option (0.5x, 1x, 2x speed)
-- Camera angle is optimized for hand visibility
-- Gesture can be replayed on demand
-
-### US5: Performance Optimization
-**As a** user on a mobile device  
-**I want** the avatar to run smoothly without draining battery  
-**So that** I can use the app without frustration  
-
-**Acceptance Criteria:**
-- Smooth 60 FPS on modern mobile devices
-- Automatic quality reduction on low-end devices
-- Efficient memory usage (< 100MB)
-- Gesture caching to reduce re-calculations
-
-### US6: Emotion/Expression Display
-**As a** a user  
-**I want to** understand the emotional context of signs  
-**So that** I grasp the full meaning of the message  
-
-**Acceptance Criteria:**
-- Avatar eyebrows change based on sentence type (question, statement, etc.)
-- Mouth shapes indicate emphasis or emotion
-- Eye contact maintained with viewer
-- Facial expressions are timed with hand gestures
+### Visual Style: Stylized Cartoon 3D (Pixar-adjacent)
+- **NOT** hyper-realistic — intentionally rounded, friendly, approachable
+- **Head:** Oversized relative to body (~1:2.5 head-to-body ratio)
+- **Body:** Compact, slightly chubby proportions, no sharp angles
+- **Hands:** Slightly large relative to body for sign language clarity
+- **Face:** Dot eyes, minimal nose, simple smile — expressive but simple
+- **Clothing:** Blue long-sleeve top, dark navy shorts — clean and neutral
+- **Skin:** Warm medium tone (#E0B896) as the default
 
 ---
 
-## 3. Features
+## 1. Product Vision
 
-### 3.1 Core Avatar Features
-- **Realistic Human Model**: Anatomically correct proportions with head, torso, arms, hands
-- **Detailed Hand System**: Individual finger articulation (thumb, index, middle, ring, pinky)
-- **Facial System**: Eyebrows, eyes, mouth for non-manual markers
-- **Body Articulation**: Shoulders, elbows, wrists, spine for complex gestures
-- **Material System**: Realistic skin, clothing, and hair materials
+### What We Are Building
+A stylized 3D cartoon avatar (matching the reference model exactly) that performs Indian Sign Language (ISL) gestures in real-time — built in React Three Fiber using procedural geometry (no .glb file needed for MVP).
 
-### 3.2 Animation System
-- **Gesture Library**: 30+ ISL gestures with accurate hand shapes and movements
-- **Gesture Chaining**: Smooth transitions between sequential signs
-- **Non-Manual Markers**: Facial expressions for sentence context (questions, negations, etc.)
-- **Speed Control**: Adjustable playback speed (0.5x to 2x)
-- **Looping**: Ability to repeat gestures or sentences
+### Who It's For
+| User | Goal |
+|------|------|
+| Deaf / Hard-of-Hearing | Understand sign language translations visually |
+| ISL Learners | Study correct hand shapes and body posture |
+| Developers | Test and expand the gesture database |
 
-### 3.3 Customization
-- **Color Customization**: Skin tone, clothing colors, hair color
-- **Camera Angles**: Multiple viewing angles (front, 3/4, side)
-- **Background Options**: Plain, gradient, or blurred background
-- **Size Adjustment**: Scale avatar for better visibility
-
-### 3.4 Interactive Features
-- **Play/Pause Controls**: Standard video-like controls
-- **Gesture Timeline**: Visual representation of gesture sequence
-- **Speed Control**: Slider for playback speed adjustment
-- **Repeat Button**: Quick gesture replay
-- **Full-Screen Mode**: Immersive viewing experience
-
-### 3.5 Accessibility Features
-- **High Contrast Mode**: Enhanced visibility
-- **Text Captions**: Display gesture meanings
-- **Audio Cues**: Optional sound effects for transitions
-- **Keyboard Navigation**: Full keyboard control support
-- **Screen Reader Support**: Descriptive labels for all controls
-
-### 3.6 Advanced Features
-- **Avatar Analytics**: Track which gestures are viewed most
-- **Gesture Recording**: Record custom user gestures (future)
-- **Multi-Avatar Mode**: Show multiple signers for dialogue (future)
-- **Sign Variation Display**: Show regional ISL variations (future)
+### Core Promise
+> A friendly 3D avatar that signs ISL gestures smoothly, accurately, and accessibly — matching the reference model in proportions and style.
 
 ---
 
-## 4. Technical Requirements
+## 2. User Stories
 
-### 4.1 Frontend Stack
-- **Rendering Engine**: Three.js (WebGL)
-- **React Integration**: React Three Fiber + react-three/drei
-- **Animation Library**: Framer Motion for UI animations
-- **State Management**: Zustand for avatar state
+### US1 — Gesture Playback
+**As a** user, **I want** to click a word and **see** the avatar sign it  
+**Acceptance:**
+- Avatar moves from idle → gesture → idle smoothly
+- Hand shapes match ISL standards
+- Completes in 0.8–1.5 seconds per gesture
+- No stuttering or jank (60 FPS desktop)
 
-### 4.2 Performance Targets
-- **Frame Rate**: 60 FPS minimum on desktop, 30 FPS on mobile
-- **Load Time**: Avatar loads in < 2 seconds
-- **Memory**: < 100MB RAM usage
-- **Bundle Size**: Avatar system < 500KB (gzipped)
+### US2 — Sentence Signing
+**As a** user, **I want** to type a sentence and **see** the full sequence signed  
+**Acceptance:**
+- Signs chain naturally with 200–300ms transition between words
+- Sentence-level NMMs applied (eyebrows for questions, head shake for negation)
+- Can pause mid-sentence
 
-### 4.3 Browser Support
-- Chrome/Chromium 90+
-- Firefox 88+
-- Safari 14+
-- Edge 90+
-- Mobile Safari 14+
-- Chrome Mobile (Android 8+)
+### US3 — Avatar Customization
+**As a** user, **I want** to change the avatar's skin tone and outfit  
+**Acceptance:**
+- 6 skin tones available (matching reference palette)
+- 4 outfit colors
+- Updates instantly, no reload
+- Persists in session
 
-### 4.4 Data Requirements
-- **Gesture Database**: JSON format with quaternion-based poses
-- **Animation Curves**: Easing functions for smooth transitions
-- **Metadata**: Gesture names, related words, difficulty levels
+### US4 — Developer Gesture Testing
+**As a** developer, **I want** a test panel to trigger any gesture and inspect the result  
+**Acceptance:**
+- All 22+ gesture buttons visible
+- Active gesture highlighted
+- Sentence input field for multi-word testing
+- Status badge shows current signing state
 
----
-
-## 5. Success Metrics
-
-| Metric | Target | How to Measure |
-|--------|--------|-----------------|
-| Frame Rate | 60 FPS (desktop), 30 FPS (mobile) | Chrome DevTools Performance |
-| Load Time | < 2 seconds | Lighthouse metrics |
-| Gesture Recognition | 99% accuracy | Manual testing against ISL standards |
-| User Engagement | > 80% completion on gesture sequences | Analytics dashboard |
-| Accessibility Score | > 90 (WebAIM) | Automated testing |
-| Mobile Compatibility | Works on 95%+ of devices | Device testing matrix |
-| User Satisfaction | > 4.5/5 stars | User feedback surveys |
-
----
-
-## 6. Constraints & Dependencies
-
-### Constraints
-- Must work on low-spec mobile devices (2GB RAM minimum)
-- No external API calls for gesture data (offline-first)
-- WebGL 2.0 only (no WebGPU yet)
-- File size limited to < 50MB total package
-
-### Dependencies
-- Three.js ecosystem
-- React 19+
-- Modern ES2021+ JavaScript support
-- GPU support for WebGL rendering
+### US5 — Clarity for Low Vision
+**As a** user with low vision, **I want** to slow down animations and zoom  
+**Acceptance:**
+- 0.5x speed option
+- Orbit controls to zoom/rotate
+- High contrast background toggle
+- Captions beneath avatar showing current gloss
 
 ---
 
-## 7. Timeline & Milestones
+## 3. Feature Scope
 
-### Phase 1: MVP (Weeks 1-4)
-- Basic 3D avatar rendering
-- 30+ gesture animations
-- Play/pause controls
-- Single gesture playback
+### Phase 1 (NOW — Foundation) ✅ / 🔄
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Avatar renders in canvas | ✅ Done | HubAvatar + RealisticAvatar working |
+| Idle breathing animation | ✅ Done | applyIdleMotion() in HubAvatar |
+| 22 ISL gesture poses | ✅ Done | islAnimationMap.js |
+| Gesture playback (single) | ✅ Done | SLERP blend via PoseBlender |
+| Sentence queue system | ✅ Done | glossQueue in appStore |
+| Dev test panel in /hub | ✅ Done | All 22 gestures, skin/outfit controls |
+| Orbit camera controls | ✅ Done | OrbitControls from drei |
+| Skin tone (6 options) | ✅ Done | appStore.skinTone |
+| Outfit color (4 options) | ✅ Done | appStore.outfitColor |
+| Homepage | ✅ Done | Landing.jsx |
 
-### Phase 2: Enhancement (Weeks 5-8)
-- Gesture chaining for sentences
-- Non-manual markers
-- Customization options
-- Performance optimization
+### Phase 2 (NEXT — Hands & Face)
+| Feature | Status | Priority |
+|---------|--------|----------|
+| Improved hand geometry | 🔴 Not started | CRITICAL |
+| Individual finger bones (MCP/PIP/DIP per finger) | 🔴 Not started | CRITICAL |
+| Non-manual markers (eyebrows, mouth) | 🔴 Not started | HIGH |
+| Facial expression sync with gestures | 🔴 Not started | HIGH |
+| Speed control slider in dev panel | 🔴 Not started | MEDIUM |
+| Gesture duration metadata | 🔴 Not started | MEDIUM |
 
-### Phase 3: Polish (Weeks 9-12)
-- Accessibility features
-- Mobile optimization
-- Analytics integration
-- User testing & refinement
+### Phase 3 — Expand & Polish
+| Feature | Status | Priority |
+|---------|--------|----------|
+| 50+ more ISL gestures | 🔴 Not started | HIGH |
+| Mobile performance (LOD) | 🔴 Not started | HIGH |
+| Accessibility panel (captions, contrast) | 🔴 Not started | MEDIUM |
+| Deployed live demo | 🔴 Not started | MEDIUM |
 
-### Phase 4: Advanced (Weeks 13+)
-- Gesture recording
-- Multi-avatar support
-- Variation display
-- Community features
+---
+
+## 4. Avatar Geometry Specification
+
+### Based on Reference Images (`assets/reference/`)
+
+#### Head
+- Large, round sphere — radius ~0.28 units
+- Slight vertical squish (scaleY 0.95)
+- Face features: dot eyes, small nose bump, curved mouth
+- Brown hair cap on top (hemisphere)
+- Ears: small sphere stubs on sides
+
+#### Body/Torso
+- Rounded cylinder, slightly tapered — wider at chest, narrower at waist
+- Height ~0.55 units, radius ~0.18 at chest
+- Slight belly protrusion (sphere merge or scale)
+- Blue top color, dark navy bottom
+
+#### Arms
+- Upper arm: tapered cylinder, length ~0.28
+- Forearm: tapered cylinder, length ~0.25
+- Rest pose: arms slightly out from body (~20-25° shoulder abduction)
+- Slight elbow bend in idle pose
+
+#### Hands (Critical — based on `hands.png`)
+- Stylized cartoon hand — NOT hyper-realistic
+- Palm: rounded box/sphere merge
+- 4 fingers + thumb, each with **3 joints**: MCP → PIP → DIP
+- Joints labeled in reference: MCP (knuckle), PIP (mid), DIP (tip)
+- Fingers slightly chunky/rounded — cylinder with sphere caps
+- Thumb offset at ~45° from palm
+
+#### Legs
+- Short, compact — roughly same length as torso
+- Slightly tapered at ankles
+- Dark navy shorts/pants to mid-thigh
+
+---
+
+## 5. Animation Requirements
+
+### Idle Pose
+- Subtle breathing (hips bob ±0.005 units, 1.5Hz)
+- Slight head sway (rotation.z ±0.02, 0.5Hz)
+- Arms relaxed at sides (~20° shoulder abduction)
+- Fingers slightly curled (not fully open, not fist)
+
+### Gesture Playback
+- **Blend in:** 250ms from idle → gesture pose (easeInOutCubic)
+- **Hold:** 600–1200ms at peak pose
+- **Blend out:** 250ms from gesture → idle
+- **Total per gesture:** ~1100–1700ms
+- **Between gestures in sentence:** 150ms crossfade (no full return to idle)
+
+### Non-Manual Markers (NMMs)
+- **Yes/No question:** Eyebrows raised
+- **Wh- question:** Eyebrows lowered/furrowed
+- **Negation:** Head shake (rotation.y oscillation)
+- **Affirmation:** Slight nod (rotation.x dip)
+
+---
+
+## 6. Performance Requirements
+
+| Target | Desktop | Mobile |
+|--------|---------|--------|
+| Frame rate | 60 FPS | 30 FPS |
+| Memory | < 80 MB | < 60 MB |
+| Load time | < 1.5s | < 3s |
+| Gesture latency | < 50ms | < 100ms |
+
+---
+
+## 7. Out of Scope (MVP)
+
+- Loading external .glb/.gltf models (all geometry is procedural)
+- Lip sync
+- Webcam pose detection
+- Physics (hair/cloth)
+- Real-time voice input
+- Multi-avatar dialogue
+- Backend/API for translations
 
 ---
 
 ## 8. Acceptance Criteria
 
-The 3D Avatar system will be considered complete when:
+The 3D avatar is ready when:
 
-1. ✅ Avatar renders realistically with proper anatomy
-2. ✅ All 30+ ISL gestures animate correctly
-3. ✅ Gesture sequences play smoothly without jank
-4. ✅ Non-manual markers (facial expressions) display accurately
-5. ✅ Customization options work and persist
-6. ✅ Achieves 60 FPS on desktop, 30 FPS on mobile
-7. ✅ Loads in < 2 seconds
-8. ✅ Accessibility standards met (WCAG 2.1 AA minimum)
-9. ✅ Works on 95%+ of target browsers/devices
-10. ✅ User testing shows > 4.5/5 satisfaction rating
-
----
-
-## 9. Out of Scope (for MVP)
-
-- Avatar lip-syncing with audio
-- Real-time pose detection from webcam
-- 3D hand tracking input
-- Network multiplayer
-- Avatar physics (hair/cloth simulation)
-- Custom avatar model uploads
-- Sign to speech conversion (reverse flow)
-
----
-
-## 10. Glossary & Definitions
-
-- **Gloss**: Written representation of a sign (e.g., "HELLO")
-- **NMM**: Non-Manual Marker (facial expressions, head movements)
-- **Quaternion**: Mathematical representation of 3D rotation
-- **Keyframe**: Specific animation frame at a point in time
-- **Articulation**: Joint movement in the skeleton
-
+1. ☐ Visually matches reference model (`assets/reference/front.png`) within ~85% similarity
+2. ☐ 22+ ISL gestures play correctly with smooth SLERP
+3. ☐ Sentence queue signs multiple words without breaking
+4. ☐ Hands show clear finger articulation (MCP/PIP/DIP visible)
+5. ☐ NMMs (eyebrows) respond to sentence type
+6. ☐ 60 FPS maintained during gesture playback
+7. ☐ Skin tone and outfit update in real-time
+8. ☐ Orbit controls let developer inspect from all angles
+9. ☐ Dev test panel lets developer trigger any gesture
+10. ☐ Works on Chrome, Firefox, Safari desktop
