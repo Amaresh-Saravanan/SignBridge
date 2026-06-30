@@ -13,7 +13,7 @@ function AppLayout() {
   const hideNav = ['/', '/auth'].includes(location.pathname)
 
   return (
-    <div className="flex flex-col min-h-screen bg-[var(--color-bg-base)] text-[var(--color-text-primary)]">
+    <div className="flex flex-col min-h-screen bg-bg-base text-text-primary">
       {!hideNav && <Nav />}
 
       <main className="flex-1 flex flex-col">

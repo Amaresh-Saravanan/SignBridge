@@ -57,10 +57,10 @@ export default function LoginForm({ onToggleMode }) {
       onSubmit={handleSubmit}
       className="flex flex-col gap-6"
     >
-      <h3 className="h3 font-display text-center text-[var(--color-text-primary)]">Welcome back</h3>
+      <h3 className="h3 font-display text-center text-text-primary">Welcome back</h3>
 
       {authError && (
-        <div role="alert" className="bg-[var(--color-error-tint)] border border-[var(--color-error-shade)] rounded-[var(--radius-sm)] px-4 py-3 text-sm text-[var(--color-error-shade)]">
+        <div role="alert" className="bg-error-tint border border-error-shade rounded-sm px-4 py-3 text-sm text-error-shade">
           {authError}
         </div>
       )}
@@ -93,7 +93,7 @@ export default function LoginForm({ onToggleMode }) {
           <button
             type="button"
             onClick={() => onToggleMode('forgot')}
-            className="mt-2 text-xs text-[var(--color-accent)] hover:underline transition-colors cursor-pointer"
+            className="mt-2 text-xs text-accent hover:underline transition-colors cursor-pointer"
           >
             Forgot password?
           </button>
@@ -101,36 +101,36 @@ export default function LoginForm({ onToggleMode }) {
       </div>
 
       <div>
-        <label className="text-auth-label text-[var(--color-text-secondary)] font-semibold block mb-3">Communication style</label>
+        <label className="text-auth-label text-text-secondary font-semibold block mb-3">Communication style</label>
         <div className="grid grid-cols-2 gap-4 w-full select-none">
           <button
             type="button"
             onClick={() => setRoleLocal('deaf')}
-            className={`flex flex-col items-center justify-center gap-2 p-4 rounded-[var(--radius-default)] border transition-all cursor-pointer min-h-[92px] ${
+            className={`flex flex-col items-center justify-center gap-2 p-4 rounded-default border transition-all cursor-pointer min-h-23 ${
               role === 'deaf'
-                ? 'border-[var(--color-accent)] bg-[var(--color-accent-soft)] shadow-card text-[var(--color-accent)] font-bold'
-                : 'border-[var(--color-border)] bg-[var(--color-surface-elevated)] hover:border-[var(--color-text-secondary)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
+                ? 'border-accent bg-accent-soft shadow-card text-accent font-bold'
+                : 'border-border bg-surface-elevated hover:border-text-secondary text-text-secondary hover:text-text-primary'
             }`}
           >
             <Hand size={18} />
             <span className="text-xs">Deaf / Signer</span>
-            {role === 'deaf' && <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-accent)] mt-0.5" />}
+            {role === 'deaf' && <span className="w-1.5 h-1.5 rounded-full bg-accent mt-0.5" />}
           </button>
           <button
             type="button"
             onClick={() => setRoleLocal('hearing')}
-            className={`flex flex-col items-center justify-center gap-2 p-4 rounded-[var(--radius-default)] border transition-all cursor-pointer min-h-[92px] ${
+            className={`flex flex-col items-center justify-center gap-2 p-4 rounded-default border transition-all cursor-pointer min-h-23 ${
               role === 'hearing'
-                ? 'border-[var(--color-accent)] bg-[var(--color-accent-soft)] shadow-card text-[var(--color-accent)] font-bold'
-                : 'border-[var(--color-border)] bg-[var(--color-surface-elevated)] hover:border-[var(--color-text-secondary)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
+                ? 'border-accent bg-accent-soft shadow-card text-accent font-bold'
+                : 'border-border bg-surface-elevated hover:border-text-secondary text-text-secondary hover:text-text-primary'
             }`}
           >
             <Ear size={18} />
             <span className="text-xs">Hearing / Speaker</span>
-            {role === 'hearing' && <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-accent)] mt-0.5" />}
+            {role === 'hearing' && <span className="w-1.5 h-1.5 rounded-full bg-accent mt-0.5" />}
           </button>
         </div>
-        <p className="text-[11px] text-[var(--color-text-secondary)] mt-2 leading-relaxed">
+        <p className="text-[11px] text-text-secondary mt-2 leading-relaxed">
           We tailor the workspace experience based on whether you are primarily signing or speaking.
         </p>
       </div>
@@ -151,7 +151,7 @@ export default function LoginForm({ onToggleMode }) {
               onChange={setDialectLocal}
               searchable
             />
-            <p className="text-[11px] text-[var(--color-text-secondary)] mt-1 leading-relaxed">
+            <p className="text-[11px] text-text-secondary mt-1 leading-relaxed">
               You can change your sign language dialect preference anytime in settings.
             </p>
           </motion.div>
@@ -163,17 +163,17 @@ export default function LoginForm({ onToggleMode }) {
       </Button>
 
       <div className="flex items-center gap-3 py-2">
-        <div className="flex-1 h-px bg-[var(--color-border)]" />
-        <span className="text-caption text-[var(--color-text-disabled)]">or</span>
-        <div className="flex-1 h-px bg-[var(--color-border)]" />
+        <div className="flex-1 h-px bg-border" />
+        <span className="text-caption text-text-disabled">or</span>
+        <div className="flex-1 h-px bg-border" />
       </div>
 
-      <p className="text-center text-sm text-[var(--color-text-secondary)]">
+      <p className="text-center text-sm text-text-secondary">
         New here?{' '}
         <button
           type="button"
           onClick={() => onToggleMode('signup')}
-          className="text-[var(--color-accent)] hover:underline transition-colors cursor-pointer"
+          className="text-accent hover:underline transition-colors cursor-pointer"
         >
           Create an account
         </button>
