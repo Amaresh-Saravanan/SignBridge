@@ -26,7 +26,7 @@ export default function PermissionGranted() {
         initial={{ scale: 0.6, opacity: 0 }}
         animate={{ scale: [0.6, 1.15, 1], opacity: 1 }}
         transition={{ duration: 0.45, ease: 'easeOut' }}
-        className="w-16 h-16 rounded-full bg-[var(--color-success-tint)] border border-[var(--color-success-shade)] flex items-center justify-center text-[var(--color-success-shade)]"
+        className="w-16 h-16 rounded-full bg-success-tint border border-success-shade flex items-center justify-center text-success-shade"
       >
         <CheckCircle2 size={32} />
       </motion.div>

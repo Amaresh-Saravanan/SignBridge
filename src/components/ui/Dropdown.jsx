@@ -30,39 +30,39 @@ export default function Dropdown({
   }, [])
 
   const filtered = searchable
-    ? options.filter(o => o.label.toLowerCase().includes(search.toLowerCase()))
+    ? options.filter((o) => o.label.toLowerCase().includes(search.toLowerCase()))
     : options
 
-  const selected = options.find(o => o.value === value)
+  const selected = options.find((o) => o.value === value)
 
   return (
     <div className={`flex flex-col gap-2 ${className}`} ref={ref}>
       {label && (
-        <label className="text-auth-label text-[var(--color-text-secondary)]">{label}</label>
+        <label className="text-auth-label text-text-secondary">{label}</label>
       )}
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center justify-between w-full px-4 py-3 rounded-[var(--radius-input)] bg-[var(--color-surface-elevated)] border border-[var(--color-border)] text-left text-base transition-all duration-200 cursor-pointer hover:border-[var(--color-text-disabled)] focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_rgba(201,138,62,0.15)] outline-none min-h-[48px]"
+        className="flex items-center justify-between w-full px-4 py-3 rounded-input bg-surface-elevated border border-border text-left text-base transition-all duration-200 cursor-pointer hover:border-text-disabled focus:border-accent focus:shadow-[0_0_0_3px_rgba(201,138,62,0.15)] outline-none min-h-12"
       >
-        <span className={selected ? 'text-[var(--color-text-primary)]' : 'text-[var(--color-text-disabled)]'}>
+        <span className={selected ? 'text-text-primary' : 'text-text-disabled'}>
           {selected ? selected.label : placeholder}
         </span>
-        <ChevronDown size={18} className={`text-[var(--color-text-secondary)] transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown size={18} className={`text-text-secondary transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
       </button>
 
       {open && (
         <div className="relative z-50">
-          <div className="absolute top-1 left-0 w-full bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-[var(--radius-default)] shadow-dropdown overflow-hidden">
+          <div className="absolute top-1 left-0 w-full bg-surface-elevated border border-border rounded-default shadow-dropdown overflow-hidden">
             {searchable && (
-              <div className="flex items-center gap-2 px-3 py-2 border-b border-[var(--color-border)]">
-                <Search size={16} className="text-[var(--color-text-disabled)]" />
+              <div className="flex items-center gap-2 px-3 py-2 border-b border-border">
+                <Search size={16} className="text-text-disabled" />
                 <input
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search..."
-                  className="flex-1 bg-transparent text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-disabled)] outline-none"
+                  className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-disabled outline-none"
                   autoFocus
                 />
               </div>
@@ -73,14 +73,14 @@ export default function Dropdown({
                   key={option.value}
                   type="button"
                   onClick={() => { onChange(option.value); setOpen(false); setSearch('') }}
-                  className="flex items-center justify-between w-full px-4 py-3 text-base text-left hover:bg-[var(--color-border)] transition-colors cursor-pointer"
+                  className="flex items-center justify-between w-full px-4 py-3 text-base text-left hover:bg-border transition-colors cursor-pointer"
                 >
-                  <span className="text-[var(--color-text-primary)]">{option.label}</span>
-                  {value === option.value && <Check size={16} className="text-[var(--color-accent)]" />}
+                  <span className="text-text-primary">{option.label}</span>
+                  {value === option.value && <Check size={16} className="text-accent" />}
                 </button>
               ))}
               {filtered.length === 0 && (
-                <p className="px-4 py-3 text-sm text-[var(--color-text-disabled)]">No results found</p>
+                <p className="px-4 py-3 text-sm text-text-disabled">No results found</p>
               )}
             </div>
           </div>

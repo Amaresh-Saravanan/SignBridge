@@ -34,11 +34,11 @@ export default function ForgotPasswordForm({ onToggleMode }) {
       transition={{ duration: 0.25 }}
       className="flex flex-col gap-6"
     >
-      <h3 className="h3 font-display text-center text-[var(--color-text-primary)]">Reset your password</h3>
+      <h3 className="h3 font-display text-center text-text-primary">Reset your password</h3>
 
       {sent ? (
         <div className="flex flex-col gap-4">
-          <div className="bg-[var(--color-success-tint)] border border-[var(--color-success)] rounded-[var(--radius-sm)] px-4 py-3 text-sm text-[var(--color-success)]">
+          <div className="bg-success-tint border border-success rounded-sm px-4 py-3 text-sm text-success">
             Check your inbox — a reset link is on its way.
           </div>
           <Button
@@ -51,12 +51,12 @@ export default function ForgotPasswordForm({ onToggleMode }) {
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-          <p className="text-sm text-[var(--color-text-secondary)] text-center leading-relaxed">
+          <p className="text-sm text-text-secondary text-center leading-relaxed">
             Enter your email and we'll send you a reset link.
           </p>
 
           {error && (
-            <div role="alert" className="bg-[var(--color-error-tint)] border border-[var(--color-error-shade)] rounded-[var(--radius-sm)] px-4 py-3 text-sm text-[var(--color-error-shade)]">
+            <div role="alert" className="bg-error-tint border border-error-shade rounded-sm px-4 py-3 text-sm text-error-shade">
               {error}
             </div>
           )}
@@ -80,7 +80,7 @@ export default function ForgotPasswordForm({ onToggleMode }) {
       <button
         type="button"
         onClick={() => onToggleMode('login')}
-        className="flex items-center gap-1.5 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors cursor-pointer mx-auto mt-2"
+        className="flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary transition-colors cursor-pointer mx-auto mt-2"
       >
         <ArrowLeft size={16} />
         Back to login

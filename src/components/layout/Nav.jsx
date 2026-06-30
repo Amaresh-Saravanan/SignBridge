@@ -9,10 +9,10 @@ export default function Nav() {
   const isActive = (path) => location.pathname === path
 
   return (
-    <nav className="sticky top-0 z-[100] bg-[var(--color-bg-base)] border-b border-[var(--color-border)] h-16">
-      <div className="max-w-[1280px] mx-auto px-6 md:px-12 h-full flex items-center justify-between">
+    <nav className="sticky top-0 z-100 bg-bg-base border-b border-border h-16">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 h-full flex items-center justify-between">
         {/* Wordmark */}
-        <Link to="/" className="text-xl font-bold tracking-wide font-display text-[var(--color-text-primary)] hover:text-[var(--color-accent)] transition-colors">
+        <Link to="/" className="text-xl font-bold tracking-wide font-display text-text-primary hover:text-accent transition-colors">
           SignBridge
         </Link>
 
@@ -20,7 +20,7 @@ export default function Nav() {
         <div className="hidden md:flex items-center gap-8">
           <Link
             to="/hub"
-            className={`nav-link-underline text-sm transition-colors ${isActive('/hub') ? 'text-[var(--color-text-primary)] font-medium' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'}`}
+            className={`nav-link-underline text-sm transition-colors ${isActive('/hub') ? 'text-text-primary font-medium' : 'text-text-secondary hover:text-text-primary'}`}
           >
             Avatar Studio
           </Link>
@@ -28,7 +28,7 @@ export default function Nav() {
 
         {/* Mobile hamburger */}
         <button
-          className="md:hidden text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors cursor-pointer"
+          className="md:hidden text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
           aria-expanded={mobileOpen}
@@ -39,8 +39,8 @@ export default function Nav() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden absolute top-16 left-0 w-full bg-[var(--color-surface)] border-b border-[var(--color-border)] p-6 flex flex-col gap-4 z-[99]">
-          <Link to="/hub" onClick={() => setMobileOpen(false)} className="text-base text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]">Avatar Studio</Link>
+        <div className="md:hidden absolute top-16 left-0 w-full bg-surface border-b border-border p-6 flex flex-col gap-4 z-99">
+          <Link to="/hub" onClick={() => setMobileOpen(false)} className="text-base text-text-secondary hover:text-text-primary">Avatar Studio</Link>
         </div>
       )}
     </nav>

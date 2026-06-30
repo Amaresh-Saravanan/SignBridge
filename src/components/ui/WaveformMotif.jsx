@@ -31,7 +31,7 @@ export default function WaveformMotif({ state = 'idle', className = '', size = 4
             custom={i}
             variants={lineVariants}
             animate="listening"
-            className="w-[2px] rounded-full bg-[var(--color-accent)]"
+            className="w-[2px] rounded-full bg-accent"
             style={{
               height: i === 2 ? '24px' : i === 1 || i === 3 ? '16px' : '10px',
               opacity: 0.3 + (i * 0.1)
@@ -54,7 +54,7 @@ export default function WaveformMotif({ state = 'idle', className = '', size = 4
           strokeWidth="1.2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="text-[var(--color-accent)] opacity-85 transition-all duration-300"
+          className="text-accent opacity-85 transition-all duration-300"
         >
           {/* A simple hand outline */}
           <path d="M18 11V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2v3.8" />
@@ -77,7 +77,7 @@ export default function WaveformMotif({ state = 'idle', className = '', size = 4
         fill="none"
         stroke="currentColor"
         strokeWidth="1"
-        className="text-[var(--color-text-secondary)] opacity-30"
+        className="text-text-secondary opacity-30"
       >
         <motion.path
           d="M 0 6 Q 25 4, 50 6 T 100 6"

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useEffectEvent } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Canvas } from '@react-three/fiber'
 import { Settings, Mic, MicOff } from 'lucide-react'
@@ -46,6 +46,7 @@ export default function Hub() {
     setInputText('')
     setTranscript('')
     setProcessing(true)
+    let glossTokens = []
 
     try {
       const response = await fetch('http://localhost:3001/api/translate', {
@@ -61,7 +62,7 @@ export default function Hub() {
       const result = await response.json()
 
       if (result.success && result.data.glosses.length > 0) {
-        const glossTokens = result.data.glosses.map(g => g.token)
+        glossTokens = result.data.glosses.map((g) => g.token)
         enqueueGlosses(glossTokens)
 
         if (result.data.nmm) {
@@ -84,53 +85,75 @@ export default function Hub() {
     }
   }
 
+  const replayPhraseEffect = useEffectEvent(() => {
+    triggerSigning(replayPhrase, 'hearing')
+    clearReplayPhrase()
+  })
+
+  const speechStoppedEffect = useEffectEvent((spokenText) => {
+    void handleHearingTranslation(spokenText)
+  })
+
   // Replay phrase from History page
   useEffect(() => {
     if (replayPhrase) {
-      triggerSigning(replayPhrase, 'hearing')
-      clearReplayPhrase()
+      replayPhraseEffect()
     }
   }, [replayPhrase])
 
   useEffect(() => {
-    if (!isSpeechListening && transcript.trim()) {
-      handleHearingTranslation(transcript)
+    if (!isSpeechListening) {
+      setListening(false)
     }
-    setListening(isSpeechListening)
-  }, [isSpeechListening])
+  }, [isSpeechListening, setListening])
+
+  useEffect(() => {
+    if (isSpeechListening) return
+    if (!transcript.trim()) return
+
+    const timeoutId = setTimeout(() => {
+      speechStoppedEffect(transcript)
+    }, 0)
+
+    return () => clearTimeout(timeoutId)
+  }, [isSpeechListening, transcript])
 
   const toggleListening = () => {
-    if (isListening) stopSpeech()
-    else {
-      setTranscript('')
-      startSpeech()
+    if (isSpeechListening) {
+      setListening(false)
+      stopSpeech()
+      return
     }
+
+    setTranscript('')
+    setListening(true)
+    startSpeech()
   }
 
   return (
-    <PageWrapper className="relative min-h-screen bg-[var(--color-bg-base)] text-[var(--color-text-primary)] flex flex-col">
+    <PageWrapper className="relative min-h-screen bg-bg-base text-text-primary flex flex-col">
       
       {/* Top Navigation Bar */}
       <div className="absolute top-0 left-0 w-full z-50 flex items-center justify-between p-6 pointer-events-none">
         <button 
           onClick={() => navigate('/settings')}
-          className="w-10 h-10 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center pointer-events-auto backdrop-blur-md"
+          className="w-10 h-10 rounded-full bg-surface border border-border flex items-center justify-center pointer-events-auto backdrop-blur-md"
         >
           <Settings size={20} />
         </button>
         {isAdmin && (
-          <Button variant="secondary" onClick={() => navigate('/admin/dashboard')} className="!py-1.5 !px-4 !min-h-0 !text-xs pointer-events-auto backdrop-blur-md rounded-full shadow-lg">
+          <Button variant="secondary" onClick={() => navigate('/admin/dashboard')} className="py-1.5! px-4! min-h-0! text-xs! pointer-events-auto backdrop-blur-md rounded-full shadow-lg">
             Admin
           </Button>
         )}
       </div>
 
       {/* Top Zone: 3D Avatar Area */}
-      <div className="relative w-full h-[50vh] min-h-[400px] bg-[var(--color-surface)] rounded-b-[40px] shadow-elevated flex items-center justify-center overflow-visible border-b border-[var(--color-border)]">
+      <div className="relative w-full h-[50vh] min-h-100 bg-surface rounded-b-[40px] shadow-elevated flex items-center justify-center overflow-visible border-b border-border">
         
         {/* ISL Dropdown Pill */}
-        <div className="absolute top-6 right-6 z-20 flex items-center gap-1.5 px-3 py-1.5 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-full text-caption font-semibold shadow-card cursor-pointer hover:border-[var(--color-accent)] transition-colors backdrop-blur-md">
-          <span className="text-[16px] leading-none">🇮🇳</span> ISL
+        <div className="absolute top-6 right-6 z-20 flex items-center gap-1.5 px-3 py-1.5 bg-surface-elevated border border-border rounded-full text-caption font-semibold shadow-card cursor-pointer hover:border-accent transition-colors backdrop-blur-md">
+          <span className="text-body leading-none">🇮🇳</span> ISL
           <svg className="w-3 h-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
@@ -151,19 +174,19 @@ export default function Hub() {
           {(isProcessing || isSigning) && (
             <motion.div 
               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-              className="absolute top-20 left-1/2 -translate-x-1/2 z-30 px-3 py-1 rounded-full bg-[var(--color-bg-base)] border border-[var(--color-accent)]/30 text-[11px] uppercase tracking-wider font-bold shadow-lg"
+              className="absolute top-20 left-1/2 -translate-x-1/2 z-30 px-3 py-1 rounded-full bg-bg-base border border-accent/30 text-[11px] uppercase tracking-wider font-bold shadow-lg"
             >
               {isProcessing ? (
-                <span className="text-[var(--color-warning)] animate-pulse">Processing…</span>
+                <span className="text-warning animate-pulse">Processing…</span>
               ) : (
-                <span className="text-[var(--color-accent)] animate-pulse">Signing…</span>
+                <span className="text-accent animate-pulse">Signing…</span>
               )}
             </motion.div>
           )}
         </AnimatePresence>
 
         {/* Overlapping Circular Camera Feed */}
-        <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-24 h-24 rounded-full border-4 border-[var(--color-bg-base)] overflow-hidden bg-[var(--color-surface-elevated)] shadow-[0_12px_24px_rgba(0,0,0,0.4)] z-30 flex items-center justify-center">
+         <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-24 h-24 rounded-full border-4 border-bg-base overflow-hidden bg-surface-elevated shadow-[0_12px_24px_rgba(0,0,0,0.4)] z-30 flex items-center justify-center">
            <div className="w-full h-full scale-[1.5]">
              <CameraPreview active={true} />
            </div>
@@ -171,19 +194,19 @@ export default function Hub() {
       </div>
 
       {/* Interaction Controls Zone */}
-      <div className="w-full flex-1 flex flex-col items-center pt-20 px-6 pb-6 gap-6 max-w-[500px] mx-auto">
+       <div className="w-full flex-1 flex flex-col items-center pt-20 px-6 pb-6 gap-6 max-w-125 mx-auto">
         
         {/* Glowing Mic Button */}
         <div className="relative">
           {/* Ambient Glow */}
-          <div className={`absolute inset-0 rounded-full bg-[var(--color-accent)] opacity-30 blur-xl transition-all duration-500 ${isListening ? 'scale-[1.8] animate-pulse' : 'scale-[1.2]'}`} />
+          <div className={`absolute inset-0 rounded-full bg-accent opacity-30 blur-xl transition-all duration-500 ${isListening ? 'scale-[1.8] animate-pulse' : 'scale-[1.2]'}`} />
           
           <button
             onClick={toggleListening}
             className={`relative z-10 w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 ${
               isListening 
-                ? 'bg-[var(--color-accent)] text-[var(--color-bg-base)] scale-95 shadow-[inset_0_4px_8px_rgba(0,0,0,0.3)]' 
-                : 'bg-gradient-to-b from-[var(--color-accent)] to-[#b57a34] text-[var(--color-bg-base)] shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_8px_24px_rgba(201,138,62,0.4)] hover:brightness-110'
+                ? 'bg-accent text-bg-base scale-95 shadow-[inset_0_4px_8px_rgba(0,0,0,0.3)]' 
+                : 'bg-linear-to-b from-accent to-[#b57a34] text-bg-base shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_8px_24px_rgba(201,138,62,0.4)] hover:brightness-110'
             }`}
           >
             {isListening ? <MicOff size={32} /> : <Mic size={32} />}
@@ -198,15 +221,15 @@ export default function Hub() {
                placeholder="Type your manualting..."
                value={inputText}
                onChange={(e) => setInputText(e.target.value)}
-               className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-full px-6 py-4 text-sm focus:border-[var(--color-accent)] outline-none shadow-card backdrop-blur-md placeholder:text-[var(--color-text-disabled)]"
-             />
-           </form>
-        </div>
+                className="w-full bg-surface border border-border rounded-full px-6 py-4 text-sm focus:border-accent outline-none shadow-card backdrop-blur-md placeholder:text-text-disabled"
+              />
+            </form>
+         </div>
 
-        {/* Real-time Transcript Window */}
-        <div className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-5 shadow-elevated flex flex-col flex-1 max-h-[350px] min-h-[250px] backdrop-blur-md">
+         {/* Real-time Transcript Window */}
+         <div className="w-full bg-surface border border-border rounded-lg p-5 shadow-elevated flex flex-col flex-1 max-h-87.5 min-h-62.5 backdrop-blur-md">
           <div className="flex items-center justify-center pb-4 mb-2">
-            <span className="text-sm font-semibold text-[var(--color-text-primary)]">Real-time transcript</span>
+            <span className="text-sm font-semibold text-text-primary">Real-time transcript</span>
           </div>
           
           <div className="flex-1 overflow-y-auto">

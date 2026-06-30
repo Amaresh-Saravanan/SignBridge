@@ -69,7 +69,7 @@ export default function SignUpForm({ onToggleMode }) {
       onSubmit={handleSubmit}
       className="flex flex-col gap-6"
     >
-      <h3 className="h3 font-display text-center text-[var(--color-text-primary)]">Create your account</h3>
+      <h3 className="h3 font-display text-center text-text-primary">Create your account</h3>
 
       <Input
         id="signup-name"
@@ -131,36 +131,36 @@ export default function SignUpForm({ onToggleMode }) {
       />
 
       <div>
-        <label className="text-auth-label text-[var(--color-text-secondary)] font-semibold block mb-3">Communication style</label>
+        <label className="text-auth-label text-text-secondary font-semibold block mb-3">Communication style</label>
         <div className="grid grid-cols-2 gap-4 w-full select-none">
           <button
             type="button"
             onClick={() => setRoleLocal('deaf')}
-            className={`flex flex-col items-center justify-center gap-2 p-4 rounded-[var(--radius-default)] border transition-all cursor-pointer min-h-[92px] ${
+            className={`flex flex-col items-center justify-center gap-2 p-4 rounded-default border transition-all cursor-pointer min-h-23 ${
               role === 'deaf'
-                ? 'border-[var(--color-accent)] bg-[var(--color-accent-soft)] shadow-card text-[var(--color-accent)] font-bold'
-                : 'border-[var(--color-border)] bg-[var(--color-surface-elevated)] hover:border-[var(--color-text-secondary)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
+                ? 'border-accent bg-accent-soft shadow-card text-accent font-bold'
+                : 'border-border bg-surface-elevated hover:border-text-secondary text-text-secondary hover:text-text-primary'
             }`}
           >
             <Hand size={18} />
             <span className="text-xs">Deaf / Signer</span>
-            {role === 'deaf' && <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-accent)] mt-0.5" />}
+            {role === 'deaf' && <span className="w-1.5 h-1.5 rounded-full bg-accent mt-0.5" />}
           </button>
           <button
             type="button"
             onClick={() => setRoleLocal('hearing')}
-            className={`flex flex-col items-center justify-center gap-2 p-4 rounded-[var(--radius-default)] border transition-all cursor-pointer min-h-[92px] ${
+            className={`flex flex-col items-center justify-center gap-2 p-4 rounded-default border transition-all cursor-pointer min-h-23 ${
               role === 'hearing'
-                ? 'border-[var(--color-accent)] bg-[var(--color-accent-soft)] shadow-card text-[var(--color-accent)] font-bold'
-                : 'border-[var(--color-border)] bg-[var(--color-surface-elevated)] hover:border-[var(--color-text-secondary)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
+                ? 'border-accent bg-accent-soft shadow-card text-accent font-bold'
+                : 'border-border bg-surface-elevated hover:border-text-secondary text-text-secondary hover:text-text-primary'
             }`}
           >
             <Ear size={18} />
             <span className="text-xs">Hearing / Speaker</span>
-            {role === 'hearing' && <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-accent)] mt-0.5" />}
+            {role === 'hearing' && <span className="w-1.5 h-1.5 rounded-full bg-accent mt-0.5" />}
           </button>
         </div>
-        <p className="text-[11px] text-[var(--color-text-secondary)] mt-2 leading-relaxed">
+        <p className="text-[11px] text-text-secondary mt-2 leading-relaxed">
           We tailor the workspace experience based on whether you are primarily signing or speaking.
         </p>
       </div>
@@ -181,7 +181,7 @@ export default function SignUpForm({ onToggleMode }) {
               onChange={setDialect}
               searchable
             />
-            <p className="text-[11px] text-[var(--color-text-secondary)] mt-1 leading-relaxed">
+            <p className="text-[11px] text-text-secondary mt-1 leading-relaxed">
               You can change your sign language dialect preference anytime in settings.
             </p>
           </motion.div>
@@ -192,12 +192,12 @@ export default function SignUpForm({ onToggleMode }) {
         {isLoading ? 'Creating account…' : 'Create account'}
       </Button>
 
-      <p className="text-center text-sm text-[var(--color-text-secondary)]">
+      <p className="text-center text-sm text-text-secondary">
         Already have an account?{' '}
         <button
           type="button"
           onClick={() => onToggleMode('login')}
-          className="text-[var(--color-accent)] hover:underline transition-colors cursor-pointer"
+          className="text-accent hover:underline transition-colors cursor-pointer"
         >
           Log in
         </button>

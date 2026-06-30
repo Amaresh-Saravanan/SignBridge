@@ -18,7 +18,7 @@ export default function Modal({ isOpen, onClose, title, children }) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[9000] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-9000 flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -32,13 +32,13 @@ export default function Modal({ isOpen, onClose, title, children }) {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.96 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
-            className="relative w-full max-w-lg bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-default)] p-6 shadow-elevated"
+            className="relative w-full max-w-lg bg-surface border border-border rounded-default p-6 shadow-elevated"
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">{title}</h3>
+              <h3 className="text-lg font-semibold text-text-primary">{title}</h3>
               <button
                 onClick={onClose}
-                className="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors cursor-pointer"
+                className="text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
                 aria-label="Close modal"
               >
                 <X size={20} />

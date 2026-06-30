@@ -34,7 +34,7 @@ export default function LiveCaptions() {
   if (captions.length === 0) {
     return (
       <div className="flex items-center justify-center h-full p-6">
-        <p className="text-[var(--color-text-secondary)] text-center text-body">
+        <p className="text-text-secondary text-center text-body">
           Say or sign something to get started
         </p>
       </div>
@@ -56,8 +56,8 @@ export default function LiveCaptions() {
             <div 
               className={`px-4 py-2.5 rounded-2xl max-w-[85%] ${
                 isUser 
-                  ? 'bg-[var(--color-accent)] text-[var(--color-bg-base)] rounded-br-sm'
-                  : 'bg-[rgba(201,138,62,0.15)] text-[var(--color-accent)] border border-[var(--color-accent)]/20 rounded-bl-sm'
+                  ? 'bg-accent text-bg-base rounded-br-sm'
+                  : 'bg-[rgba(201,138,62,0.15)] text-accent border border-accent/20 rounded-bl-sm'
               }`}
             >
               <p className="text-sm font-medium leading-relaxed">
@@ -66,7 +66,7 @@ export default function LiveCaptions() {
             </div>
             
             {copiedId === cap.id && (
-              <span className="absolute -top-8 bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-primary)] px-2 py-0.5 rounded-[var(--radius-sm)] shadow-card text-xs">
+              <span className="absolute -top-8 bg-surface border border-border text-text-primary px-2 py-0.5 rounded-sm shadow-card text-xs">
                 Copied
               </span>
             )}

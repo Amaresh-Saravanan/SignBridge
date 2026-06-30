@@ -26,7 +26,7 @@ export default function CameraPreview({ active = false }) {
   }, [active])
 
   return (
-    <div className="relative flex flex-col items-center justify-center h-full overflow-hidden rounded-[var(--radius-default)]">
+    <div className="relative flex flex-col items-center justify-center h-full overflow-hidden rounded-default">
       {active ? (
         <>
           <video
@@ -34,11 +34,11 @@ export default function CameraPreview({ active = false }) {
             autoPlay
             muted
             playsInline
-            className="w-full h-full object-cover rounded-[var(--radius-default)] scale-x-[-1]"
+            className="w-full h-full object-cover rounded-default scale-x-[-1]"
           />
           {/* Top row with LIVE badge and camera icon */}
           <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10 pointer-events-none">
-            <span className="flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-wider text-white bg-[var(--color-error-shade)] px-2 py-0.5 rounded-[var(--radius-sm)]">
+            <span className="flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-wider text-white bg-error-shade px-2 py-0.5 rounded-sm">
               <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
               Live
             </span>
@@ -67,13 +67,13 @@ export default function CameraPreview({ active = false }) {
               <circle cx="130" cy="200" r="4" fill="var(--color-accent)" />
             </svg>
           </div>
-          <p className="absolute bottom-3 left-1/2 -translate-x-1/2 text-caption text-[var(--color-text-secondary)] bg-[rgba(14,15,17,0.7)] px-3 py-1 rounded-full">
+          <p className="absolute bottom-3 left-1/2 -translate-x-1/2 text-caption text-text-secondary bg-[rgba(14,15,17,0.7)] px-3 py-1 rounded-full">
             Detecting signs…
           </p>
         </>
       ) : (
-        <div className="flex flex-col items-center gap-3 text-[var(--color-text-secondary)]">
-          <div className="w-16 h-16 rounded-full bg-[var(--color-surface-elevated)] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3 text-text-secondary">
+          <div className="w-16 h-16 rounded-full bg-surface-elevated flex items-center justify-center">
             <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
             </svg>

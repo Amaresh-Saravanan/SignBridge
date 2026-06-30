@@ -19,7 +19,7 @@ export default function MicWaveform({ active = false }) {
         {amplitudes.map((amp, i) => (
           <div
             key={i}
-            className="w-1.5 rounded-full bg-[var(--color-accent)] transition-transform"
+            className="w-1.5 rounded-full bg-accent transition-transform"
             style={{
               height: `${Math.max(4, amp * 100)}%`,
               opacity: 0.4 + amp * 0.6,
@@ -31,7 +31,7 @@ export default function MicWaveform({ active = false }) {
       </div>
 
       {/* Status label */}
-      <p className="text-caption text-[var(--color-text-secondary)]">
+      <p className="text-caption text-text-secondary">
         {active ? 'Listening…' : 'Tap to start speaking'}
       </p>
     </div>

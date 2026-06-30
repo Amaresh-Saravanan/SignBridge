@@ -36,6 +36,8 @@
   --color-accent-indigo: #C98A3E;
   --color-success-tint: rgba(76, 175, 130, 0.15);
   --color-success-shade: #4CAF82;
+  --color-warning-tint: rgba(217, 160, 46, 0.15);
+  --color-warning-shade: #D9A02E;
   --color-error-tint: rgba(232, 88, 77, 0.15);
   --color-error-shade: #E8584D;
 
@@ -114,7 +116,9 @@ body {
 
 /* Glassmorphism hook for Tailwind generated classes */
 [class*="bg-[var(--color-surface)]"],
-[class*="bg-[var(--color-surface-elevated)]"] {
+[class*="bg-[var(--color-surface-elevated)]"],
+[class~="bg-surface"],
+[class~="bg-surface-elevated"] {
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
 }
