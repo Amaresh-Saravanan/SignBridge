@@ -5,11 +5,9 @@
     "stitch": {
       "type": "remote",
       "url": "https://stitch.googleapis.com/mcp",
-      "enabled": true,
-      "oauth": false,
-      "headers": {
-        "X-Goog-Api-Key": "AQ.Ab8RN6JY81jz_JAeptX4YytnCsUzuoO6KlrlFqmHsrpt-K8CRg"
-      }
+      "enabled": false,
+      "oauth": true,
+      "headers": {}
     }
   }
 }
