@@ -19,7 +19,6 @@ Usage:
 
 import bpy
 import bmesh
-from mathutils import Vector
 
 
 def select_all():
@@ -37,6 +36,19 @@ def get_mesh_objects():
     return [obj for obj in bpy.data.objects if obj.type == 'MESH']
 
 
+def set_active_object(obj):
+    """Make an object active and selected for Blender operators."""
+    deselect_all()
+    bpy.context.view_layer.objects.active = obj
+    obj.select_set(True)
+
+
+def set_object_mode(mode='OBJECT'):
+    """Safely switch object mode when Blender allows it."""
+    if bpy.context.object and bpy.context.object.mode != mode:
+        bpy.ops.object.mode_set(mode=mode)
+
+
 # ============================================================
 # 1. MODIFIER APPLICATION
 # ============================================================
@@ -47,10 +59,9 @@ def apply_modifiers():
     applied_count = 0
 
     for obj in mesh_objects:
-        bpy.context.view_layer.objects.active = obj
-        obj.select_set(True)
+        set_active_object(obj)
 
-        for mod in obj.modifiers:
+        for mod in list(obj.modifiers):
             if mod.type == 'SUBSURF':
                 # Skip subdivision surface — keep as preview
                 print(f"  [SKIP] {obj.name}: Subdivision Surface kept as preview")
@@ -65,7 +76,7 @@ def apply_modifiers():
                 except Exception as e:
                     print(f"  [ERROR] {obj.name}: Could not apply {mod.name}: {e}")
 
-        obj.select_set(False)
+        deselect_all()
 
     print(f"\nTotal modifiers applied: {applied_count}")
     return applied_count
@@ -76,14 +87,17 @@ def apply_modifiers():
 # ============================================================
 
 def cleanup_non_manifold():
-    """Remove non-manifold geometry from all mesh objects."""
+    """Remove loose geometry and report any remaining non-manifold elements."""
     mesh_objects = get_mesh_objects()
-    cleaned_count = 0
+    checked_count = 0
+    remaining_issues = 0
 
     for obj in mesh_objects:
-        bpy.context.view_layer.objects.active = obj
-        obj.select_set(True)
-        bpy.ops.object.mode_set(mode='EDIT')
+        set_active_object(obj)
+        set_object_mode('EDIT')
+
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.mesh.delete_loose()
 
         bm = bmesh.from_edit_mesh(obj.data)
         bm.edges.ensure_lookup_table()
@@ -95,14 +109,19 @@ def cleanup_non_manifold():
 
         if non_manifold_edges or non_manifold_verts:
             print(f"  [CLEANUP] {obj.name}: {len(non_manifold_edges)} non-manifold edges, {len(non_manifold_verts)} non-manifold verts")
+            remaining_issues += len(non_manifold_edges) + len(non_manifold_verts)
+        else:
+            print(f"  [CLEANUP] {obj.name}: no remaining non-manifold geometry")
 
         bmesh.update_edit_mesh(obj.data)
-        bpy.ops.object.mode_set(mode='OBJECT')
-        obj.select_set(False)
-        cleaned_count += 1
+        set_object_mode('OBJECT')
+        deselect_all()
+        checked_count += 1
 
-    print(f"\nMeshes checked for non-manifold: {cleaned_count}")
-    return cleaned_count
+    print(f"\nMeshes checked for non-manifold: {checked_count}")
+    if remaining_issues:
+        print(f"Remaining non-manifold elements requiring manual review: {remaining_issues}")
+    return checked_count
 
 
 # ============================================================
@@ -115,15 +134,14 @@ def merge_vertices(threshold=0.001):
     merged_count = 0
 
     for obj in mesh_objects:
-        bpy.context.view_layer.objects.active = obj
-        obj.select_set(True)
-        bpy.ops.object.mode_set(mode='EDIT')
+        set_active_object(obj)
+        set_object_mode('EDIT')
 
         bpy.ops.mesh.select_all(action='SELECT')
-        bpy.ops.mesh.remove_doubles(threshold=threshold)
+        bpy.ops.mesh.merge_by_distance(distance=threshold)
 
-        bpy.ops.object.mode_set(mode='OBJECT')
-        obj.select_set(False)
+        set_object_mode('OBJECT')
+        deselect_all()
         merged_count += 1
 
     print(f"\nVertex merge pass completed on {merged_count} objects")
@@ -139,15 +157,14 @@ def fix_normals():
     mesh_objects = get_mesh_objects()
 
     for obj in mesh_objects:
-        bpy.context.view_layer.objects.active = obj
-        obj.select_set(True)
-        bpy.ops.object.mode_set(mode='EDIT')
+        set_active_object(obj)
+        set_object_mode('EDIT')
 
         bpy.ops.mesh.select_all(action='SELECT')
         bpy.ops.mesh.normals_make_consistent(inside=False)
 
-        bpy.ops.object.mode_set(mode='OBJECT')
-        obj.select_set(False)
+        set_object_mode('OBJECT')
+        deselect_all()
 
     print(f"\nNormals fixed on {len(mesh_objects)} objects")
 
@@ -159,29 +176,41 @@ def fix_normals():
 def check_uv_overlaps():
     """Check for overlapping UV islands."""
     mesh_objects = get_mesh_objects()
-    overlap_found = False
+    overlap_objects = []
 
     for obj in mesh_objects:
-        if obj.data.uv_layers:
-            bpy.context.view_layer.objects.active = obj
-            obj.select_set(True)
-            bpy.ops.object.mode_set(mode='EDIT')
+        if not obj.data.uv_layers:
+            print(f"  [UV] {obj.name}: skipped (no UV layers)")
+            continue
 
-            bpy.ops.mesh.select_all(action='SELECT')
+        set_active_object(obj)
+        set_object_mode('EDIT')
 
-            # UV overlap check via select overlapping
-            try:
-                bpy.ops.uv.select_overlap()
-                selected = bpy.context.tool_settings.uv_select_mode
-                print(f"  [UV] {obj.name}: UV overlap check completed")
-            except Exception as e:
-                print(f"  [UV] {obj.name}: Could not check overlaps: {e}")
+        bpy.ops.mesh.select_all(action='SELECT')
 
-            bpy.ops.object.mode_set(mode='OBJECT')
-            obj.select_set(False)
+        try:
+            bpy.ops.uv.select_all(action='SELECT')
+            bpy.ops.uv.select_overlap()
+            bmesh.update_edit_mesh(obj.data)
+            bm = bmesh.from_edit_mesh(obj.data)
+            uv_layer = bm.loops.layers.uv.active
+            has_overlap = any(loop[uv_layer].select for face in bm.faces for loop in face.loops)
+
+            if has_overlap:
+                overlap_objects.append(obj.name)
+                print(f"  [UV] {obj.name}: overlapping UVs detected")
+            else:
+                print(f"  [UV] {obj.name}: no overlapping UVs detected")
+        except Exception as e:
+            print(f"  [UV] {obj.name}: Could not check overlaps: {e}")
+
+        set_object_mode('OBJECT')
+        deselect_all()
 
     print(f"\nUV overlap check completed")
-    return overlap_found
+    if overlap_objects:
+        print(f"Objects needing UV review: {', '.join(overlap_objects)}")
+    return overlap_objects
 
 
 # ============================================================
@@ -193,8 +222,25 @@ MATERIAL_SLOTS = {
     'M_Hair': {'color': (0.243, 0.153, 0.137, 1.0), 'roughness': 0.9, 'metalness': 0.0},
     'M_Shirt': {'color': (0.392, 0.710, 0.965, 1.0), 'roughness': 0.85, 'metalness': 0.0},
     'M_Pants': {'color': (0.102, 0.137, 0.494, 1.0), 'roughness': 0.9, 'metalness': 0.0},
+    'M_Shoes': {'color': (0.215, 0.215, 0.215, 1.0), 'roughness': 0.6, 'metalness': 0.0},
     'M_Eyes': {'color': (1.0, 1.0, 1.0, 1.0), 'roughness': 0.3, 'metalness': 0.1},
     'M_EyeIris': {'color': (0.306, 0.204, 0.180, 1.0), 'roughness': 0.4, 'metalness': 0.0},
+}
+
+
+OBJECT_MATERIAL_HINTS = {
+    'skin': 'M_Skin',
+    'body': 'M_Skin',
+    'face': 'M_Skin',
+    'hair': 'M_Hair',
+    'shirt': 'M_Shirt',
+    'top': 'M_Shirt',
+    'pant': 'M_Pants',
+    'leg': 'M_Pants',
+    'shoe': 'M_Shoes',
+    'eyeiris': 'M_EyeIris',
+    'iris': 'M_EyeIris',
+    'eye': 'M_Eyes',
 }
 
 
@@ -223,6 +269,43 @@ def create_materials():
     return created_materials
 
 
+def guess_material_name(object_name):
+    """Guess the correct material from the object name using simple naming hints."""
+    name = object_name.lower()
+    for hint, material_name in OBJECT_MATERIAL_HINTS.items():
+        if hint in name:
+            return material_name
+    return None
+
+
+def assign_material_slots():
+    """Assign a standard material slot to meshes based on object names."""
+    mesh_objects = get_mesh_objects()
+    assigned_count = 0
+
+    for obj in mesh_objects:
+        material_name = guess_material_name(obj.name)
+        if not material_name:
+            print(f"  [ASSIGN] {obj.name}: no material hint found, skipped")
+            continue
+
+        material = bpy.data.materials.get(material_name)
+        if material is None:
+            print(f"  [ASSIGN] {obj.name}: material {material_name} missing, skipped")
+            continue
+
+        if obj.data.materials:
+            obj.data.materials[0] = material
+        else:
+            obj.data.materials.append(material)
+
+        assigned_count += 1
+        print(f"  [ASSIGN] {obj.name}: assigned {material_name}")
+
+    print(f"\nMaterial slot assignment completed on {assigned_count} objects")
+    return assigned_count
+
+
 # ============================================================
 # 7. TRANSFORM FREEZING
 # ============================================================
@@ -232,8 +315,7 @@ def freeze_transforms():
     mesh_objects = get_mesh_objects()
 
     for obj in mesh_objects:
-        bpy.context.view_layer.objects.active = obj
-        obj.select_set(True)
+        set_active_object(obj)
 
         bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
@@ -250,7 +332,7 @@ def freeze_transforms():
         else:
             print(f"  [WARNING] {obj.name}: Location not 0 after freeze")
 
-        obj.select_set(False)
+        deselect_all()
 
     print(f"\nTransform freeze completed on {len(mesh_objects)} objects")
 
@@ -304,8 +386,9 @@ def main():
     print("\n[5/8] Checking UV overlaps...")
     check_uv_overlaps()
 
-    print("\n[6/8] Creating materials...")
+    print("\n[6/8] Creating and assigning materials...")
     create_materials()
+    assign_material_slots()
 
     print("\n[7/8] Freezing transforms...")
     freeze_transforms()

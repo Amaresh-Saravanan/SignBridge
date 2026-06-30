@@ -8,8 +8,6 @@ export default function Footer() {
         <span className="text-[var(--color-border)]">·</span>
         <Link to="/" className="hover:text-[var(--color-text-primary)] transition-colors">Home</Link>
         <span className="text-[var(--color-border)]">·</span>
-        <Link to="/about" className="hover:text-[var(--color-text-primary)] transition-colors">About</Link>
-        <span className="text-[var(--color-border)]">·</span>
         <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--color-text-primary)] transition-colors">GitHub</a>
       </div>
     </footer>

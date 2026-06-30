@@ -7,7 +7,8 @@ import Button from '../ui/Button'
 import Dropdown from '../ui/Dropdown'
 import { useAuthStore } from '../../stores/authStore'
 import { useAppStore } from '../../stores/appStore'
-import { dialects } from '../../data/mockData'
+
+const dialects = ['ISL', 'ASL', 'BSL']
 
 export default function LoginForm({ onToggleMode }) {
   const navigate = useNavigate()
@@ -41,11 +42,7 @@ export default function LoginForm({ onToggleMode }) {
     if (role === 'deaf') setDialect(dialect)
 
     if (result.success) {
-      if (result.isFirstLogin) {
-        navigate('/onboarding')
-      } else {
-        navigate('/hub')
-      }
+      navigate('/hub')
     } else {
       setAuthError(result.error || 'Invalid credentials')
     }

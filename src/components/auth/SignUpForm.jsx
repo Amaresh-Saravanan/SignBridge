@@ -7,7 +7,8 @@ import Button from '../ui/Button'
 import Dropdown from '../ui/Dropdown'
 import { useAuthStore } from '../../stores/authStore'
 import { useAppStore } from '../../stores/appStore'
-import { dialects } from '../../data/mockData'
+
+const dialects = ['ISL', 'ASL', 'BSL']
 
 export default function SignUpForm({ onToggleMode }) {
   const navigate = useNavigate()
@@ -53,7 +54,7 @@ export default function SignUpForm({ onToggleMode }) {
     const result = await signUp({ name, email, password, role, dialect })
     setRole(role)
     if (result.success) {
-      navigate('/onboarding')
+      navigate('/hub')
     }
   }
 

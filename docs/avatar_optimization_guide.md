@@ -55,13 +55,14 @@ The script performs 8 operations:
 ### Material Verification
 
 1. Open **Properties > Material** tab
-2. Verify each material slot exists:
+2. Verify each required material slot exists:
    - Slot 0: `M_Skin` (roughness 0.75)
    - Slot 1: `M_Hair` (roughness 0.9)
    - Slot 2: `M_Shirt` (roughness 0.85)
    - Slot 3: `M_Pants` (roughness 0.9)
    - Slot 4: `M_Eyes` (roughness 0.3)
    - Slot 5: `M_EyeIris` (roughness 0.4)
+3. If the avatar includes footwear, verify optional `M_Shoes` (roughness 0.6)
 
 ### Vertex Count Check
 
@@ -110,7 +111,7 @@ If texture baking is required:
 |-------|----------|
 | Non-manifold edges persist | Select edges in Edit mode > Mesh > Clean Up > Delete Loose |
 | UV overlaps after cleanup | Manually adjust UV islands in UV Editing workspace |
-| Material slots missing | Run create_materials() function from script |
+| Material slots missing | Run `create_materials()` and `assign_material_slots()` from the script |
 | Vertex count over budget | Use Decimate modifier to reduce polygon count |
 | Normals flipped | Select all faces > Mesh > Normals > Recalculate Outside |
 
@@ -125,7 +126,7 @@ After optimization, verify:
 - [x] Duplicate vertices merged (0.001m threshold)
 - [x] Normals consistent (outward-facing)
 - [x] UV map has zero overlapping islands
-- [x] 6 material slots created with correct PBR values
+- [x] Required material slots created with correct PBR values
 - [x] All transforms frozen (location 0, rotation 0, scale 1)
 - [x] Total vertex count under 50,000
 
