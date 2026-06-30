@@ -5,16 +5,7 @@ import Nav from './components/layout/Nav'
 import ToastContainer from './components/ui/Toast'
 
 import Landing from './pages/Landing'
-import Auth from './pages/Auth'
 import Hub from './pages/Hub'
-
-import { useAuthStore } from './stores/authStore'
-
-// Route guard for authenticated users
-function ProtectedRoute() {
-  const { isAuthenticated } = useAuthStore()
-  return isAuthenticated ? <Outlet /> : <Navigate to="/auth" replace />
-}
 
 // Global layout manager that shows/hides Nav depending on pathname
 function AppLayout() {
@@ -42,14 +33,9 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route element={<AppLayout />}>
-          {/* Public Routes */}
+          {/* Routes */}
           <Route path="/" element={<Landing />} />
-          <Route path="/auth" element={<Auth />} />
-
-          {/* Protected Routes */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/hub" element={<Hub />} />
-          </Route>
+          <Route path="/hub" element={<Hub />} />
 
           {/* Fallback Route */}
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -4,15 +4,13 @@ import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 
 import LandingAvatar from '../components/landing/LandingAvatar'
-import { useAuthStore } from '../stores/authStore'
 
 
 
 export default function Landing() {
   const navigate = useNavigate()
-  const { isAuthenticated } = useAuthStore()
 
-  const handleCTA = () => navigate(isAuthenticated ? '/hub' : '/auth')
+  const handleCTA = () => navigate('/hub')
 
   return (
     <div style={{
