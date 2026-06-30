@@ -40,17 +40,18 @@ export default function Landing() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative px-6 py-24 md:py-32 max-w-6xl mx-auto">
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute top-20 left-1/2 -translate-x-1/2 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
-        </div>
+      <section className="relative w-full px-4 sm:px-6 py-20 sm:py-24 md:py-32">
+        <div className="max-w-4xl mx-auto">
+          <div className="absolute inset-0 -z-10">
+            <div className="absolute top-20 left-1/2 -translate-x-1/2 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
+          </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
-        >
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-12"
+          >
           {/* Badge */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -96,12 +97,13 @@ export default function Landing() {
               View on GitHub
             </a>
           </div>
-        </motion.div>
+          </motion.div>
+        </div>
       </section>
 
       {/* Features Section */}
-      <section className="px-6 py-24 bg-surface/50">
-        <div className="max-w-6xl mx-auto">
+      <section className="w-full px-4 sm:px-6 py-20 sm:py-24 bg-surface/50">
+        <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -138,8 +140,8 @@ export default function Landing() {
       </section>
 
       {/* Stats Section */}
-      <section className="px-6 py-24">
-        <div className="max-w-6xl mx-auto">
+      <section className="w-full px-4 sm:px-6 py-20 sm:py-24">
+        <div className="max-w-4xl mx-auto">
           <div className="grid md:grid-cols-3 gap-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -175,7 +177,7 @@ export default function Landing() {
       </section>
 
       {/* CTA Section */}
-      <section className="px-6 py-24 border-t border-border">
+      <section className="w-full px-4 sm:px-6 py-20 sm:py-24 border-t border-border">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -201,8 +203,8 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border px-6 py-12 bg-surface/30">
-        <div className="max-w-6xl mx-auto">
+      <footer className="border-t border-border px-4 sm:px-6 py-12 bg-surface/30">
+        <div className="max-w-4xl mx-auto">
           <div className="grid md:grid-cols-3 gap-8 mb-8">
             <div>
               <h4 className="font-semibold text-text-primary mb-4">SignBridge</h4>
