@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import PageWrapper from '../components/layout/PageWrapper'
 import BlobBackground from '../components/ui/BlobBackground'
 import LoginForm from '../components/auth/LoginForm'
@@ -10,7 +11,7 @@ export default function Auth() {
   const [mode, setMode] = useState('login')
 
   return (
-    <PageWrapper className="relative min-h-screen text-[var(--color-text-primary)] flex items-center justify-center py-6 px-4 md:px-6">
+    <PageWrapper className="relative min-h-screen text-[var(--color-text-primary)] flex flex-col items-center justify-center py-6 px-4 md:px-6">
       <BlobBackground className="absolute inset-0 pointer-events-none" />
       <motion.div
         layout
@@ -28,6 +29,19 @@ export default function Auth() {
           {mode === 'forgot' && <ForgotPasswordForm key="forgot" onToggleMode={setMode} />}
         </AnimatePresence>
       </motion.div>
+
+      <footer className="relative z-10 mt-auto pt-8 pb-4 w-full max-w-[420px]">
+        <div className="flex flex-col items-center gap-2 text-[13px] text-white/28">
+          <span>© {new Date().getFullYear()} SignBridge</span>
+          <div className="flex items-center gap-3">
+            <Link to="/" className="hover:text-white/60 transition-colors">Home</Link>
+            <span className="text-white/10">·</span>
+            <Link to="/about" className="hover:text-white/60 transition-colors">About</Link>
+            <span className="text-white/10">·</span>
+            <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-white/60 transition-colors">GitHub</a>
+          </div>
+        </div>
+      </footer>
     </PageWrapper>
   )
 }
